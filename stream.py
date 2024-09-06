@@ -190,10 +190,10 @@ df_saldo = df_saldo.fillna(0)
 df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] = (df_saldo[f'SO Awal Bulan {bulan}'] + df_saldo[f'Pembelian {bulan}'] - df_saldo[f'Pickup Resto {bulan}']).astype(int)
 df_saldo = df_saldo.drop(columns=['Masuk','Keluar'])
 df_saldo.iloc[:,1:] = df_saldo.iloc[:,1:].astype(int)
-st.dataframe(df_saldo)
+st.dataframe(df_saldo, use_container_width=True, hide_index=True)
 
 barang = df_saldo['Nama Barang'].values[0]
 
 st.dataframe(df_it[((df_it['Gudang #Kirim'].str.startswith('2')) | (df_it['Gudang #Kirim'].str.startswith('5')))
       & ((df_it['Gudang #Terima'].str.startswith('1')) | (df_it['Gudang #Terima'].str.startswith('9')))
-      & (df_it['Nama Barang']==barang)][['Nomor #Terima','Gudang #Terima','Tanggal #Terima','#Sat. Terkecil','#Qty. Terkecil']])
+      & (df_it['Nama Barang']==barang)][['Nomor #Terima','Gudang #Terima','Tanggal #Terima','#Sat. Terkecil','#Qty. Terkecil']], use_container_width=True, hide_index=True)
