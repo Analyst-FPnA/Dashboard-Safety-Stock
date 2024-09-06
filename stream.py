@@ -134,14 +134,14 @@ def download_file_from_google_drive(file_id, dest_path):
           df_4208 = []
           df_4205 = []
           for file in z.namelist():
-            if file.startswith(42.08):  
+            if file.startswith('42.08'):  
               # Loop untuk membaca setiap file di dalam ZIP
               for file in z.namelist():
                   with z.open(file) as f:
                       # Membaca setiap file Excel ke dalam DataFrame
                       df = pd.read_excel(f)
                       df_4208.append(df)
-            if file.startswith(42.05):  
+            if file.startswith('42.05'):  
               # Loop untuk membaca setiap file di dalam ZIP
               for file in z.namelist():
                   with z.open(file) as f:
