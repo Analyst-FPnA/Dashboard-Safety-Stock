@@ -173,7 +173,7 @@ list_bulan = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December']
 
-bulan ='August'
+bulan =st.selectbox("BULAN:", list_bulan, index='August', on_change=reset_button_state)
 
 df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(bulan):])) & ((df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
 df_saldo = df_saldo.groupby('Nama Barang')[['Masuk']].sum().reset_index().merge(df_saldo.groupby('Nama Barang')[['Keluar']].sum().reset_index(),how='outer')
@@ -198,11 +198,13 @@ df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] = (df_saldo[f
 df_saldo = df_saldo.drop(columns=['Masuk','Keluar'])
 df_saldo.iloc[:,1:] = df_saldo.iloc[:,1:].astype(int)
 df_saldo = df_saldo.merge(df_4201, how='left').rename(columns={'Total Nama Gudang':f'SO 42.01 {bulan}'})
-df_saldo = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standard'})[['Nama Barang','Angka Standard']].merge(df_saldo,how='left')
+df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standard'})[['Nama Barang','Angka Standard']]
+df_saldo = df_level.merge(df_saldo,how='left')
 df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
 st.dataframe(df_saldo, use_container_width=True, hide_index=True)
 
-barang = df_saldo['Nama Barang'].values[0]
+barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), index=1, on_change=reset_button_state)
+#barang = df_saldo['Nama Barang'].values[0]
 
 df_it['Bulan'] = pd.to_datetime(df_it['Tanggal #Terima'], format='%d %b %Y').dt.month_name()
 df_it[(df_it['Bulan']==bulan)&((df_it['Gudang #Kirim'].str.startswith('2')) | (df_it['Gudang #Kirim'].str.startswith('5')))
