@@ -115,12 +115,6 @@ def list_files_in_directory(dir_path):
         for file_name in files:
             st.write(f'  - {file_name}')
 
-# Muat model dari file yang diunduh
-if os.path.exists(save_path):
-    list_cab = load_excel(save_path)
-    print("File loaded successfully")
-else:
-    print("File does not exist")
 
 
 st.title('Dashboard - Safety Stock')
