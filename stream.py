@@ -159,8 +159,8 @@ if 'df_cab' not in locals():
   with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
     with z.open('daftar_gudang.csv') as f:
         df_cab = pd.read_csv(f)
-    with z.open('Stocklevel.csv') as f:
-        df_level = pd.read_csv(f)
+    with z.open('Stocklevel.xlsx') as f:
+        df_level = pd.read_excel(f)
 
 df = pd.read_csv('all_4208.csv')
 df_it = pd.read_csv('all_4205.csv')
