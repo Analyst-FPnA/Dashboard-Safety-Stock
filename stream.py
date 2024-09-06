@@ -159,6 +159,8 @@ if 'df_cab' not in locals():
   with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
     with z.open('daftar_gudang.csv') as f:
         df_cab = pd.read_csv(f)
+    with z.open('Stocklevel.csv') as f:
+        df_level = pd.read_csv(f)
 
 df = pd.read_csv('all_4208.csv')
 df_it = pd.read_csv('all_4205.csv')
@@ -186,14 +188,23 @@ df_kirim = df_kirim[(df_kirim['Gudang #Terima'].str.contains('|'.join(df_cab[(df
 
 df_saldo = df_saldo.merge(df_kirim.groupby('Nama Barang')[['Keluar']].sum().reset_index().rename(columns={'Keluar':f'Pickup Resto {bulan}'}),how='left')
 
+with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
+    with z.open(f'4201_{bulan}.xlsx') as f:
+        df_4201 = pd.read_excel(f,header=4).loc[1:,['Nama Barang','Total Nama Gudang']]
+
+
 df_saldo = df_saldo.fillna(0)
 df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] = (df_saldo[f'SO Awal Bulan {bulan}'] + df_saldo[f'Pembelian {bulan}'] - df_saldo[f'Pickup Resto {bulan}']).astype(int)
 df_saldo = df_saldo.drop(columns=['Masuk','Keluar'])
 df_saldo.iloc[:,1:] = df_saldo.iloc[:,1:].astype(int)
+df_saldo = df_saldo.merge(df_4201, how='left').rename(columns={'Total Nama Gudang':f'SO 42.01 {bulan}'})
+df_saldo = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standard'})[['Nama Barang','Angka Standard']].merge(df_saldo,how='left')
+df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
 st.dataframe(df_saldo, use_container_width=True, hide_index=True)
 
 barang = df_saldo['Nama Barang'].values[0]
 
-st.dataframe(df_it[((df_it['Gudang #Kirim'].str.startswith('2')) | (df_it['Gudang #Kirim'].str.startswith('5')))
+df_it['Bulan'] = pd.to_datetime(df_it['Tanggal #Terima'], format='%d %b %Y').dt.month_name()
+df_it[(df_it['Bulan']==bulan)&((df_it['Gudang #Kirim'].str.startswith('2')) | (df_it['Gudang #Kirim'].str.startswith('5')))
       & ((df_it['Gudang #Terima'].str.startswith('1')) | (df_it['Gudang #Terima'].str.startswith('9')))
-      & (df_it['Nama Barang']==barang)][['Nomor #Terima','Gudang #Terima','Tanggal #Terima','#Sat. Terkecil','#Qty. Terkecil']], use_container_width=True, hide_index=True)
+      & (df_it['Nama Barang']==barang)][['Nomor #Terima','Gudang #Terima','Tanggal #Terima','#Sat. Terkecil','#Qty. Terkecil']]
