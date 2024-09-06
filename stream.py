@@ -130,7 +130,13 @@ def download_file_from_google_drive(file_id, dest_path):
     if not os.path.exists(dest_path):
         url = f"https://drive.google.com/uc?id={file_id}"
         gdown.download(url, dest_path, quiet=False)
-        with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
+
+        
+file_id = '1kFrECcZmJ1SgvexIvcMY_tsg45nDxobH'
+dest_path = f'downloaded_file.zip'
+download_file_from_google_drive(file_id, dest_path)
+if not os.path.exists('all_4208.csv'):
+    with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
           df_4208 = []
           df_4205 = []
           for file in z.namelist():
@@ -151,10 +157,6 @@ def download_file_from_google_drive(file_id, dest_path):
           pd.concat(df_4208, ignore_index=True).to_csv('all_4208.csv',index=False)
           pd.concat(df_4205, ignore_index=True).to_csv('all_4205.csv',index=False)
         
-file_id = '1kFrECcZmJ1SgvexIvcMY_tsg45nDxobH'
-dest_path = f'downloaded_file.zip'
-download_file_from_google_drive(file_id, dest_path)
-
 if 'df_cab' not in locals():
   with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
     with z.open('daftar_gudang.csv') as f:
