@@ -207,6 +207,7 @@ barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), i
 #barang = df_saldo['Nama Barang'].values[0]
 
 df_it['Bulan'] = pd.to_datetime(df_it['Tanggal #Terima'], format='%d %b %Y').dt.month_name()
-df_it[(df_it['Bulan']==bulan)&((df_it['Gudang #Kirim'].str.startswith('2')) | (df_it['Gudang #Kirim'].str.startswith('5')))
+st.dataframe(df_it[(df_it['Bulan']==bulan)&((df_it['Gudang #Kirim'].str.startswith('2')) | (df_it['Gudang #Kirim'].str.startswith('5')))
       & ((df_it['Gudang #Terima'].str.startswith('1')) | (df_it['Gudang #Terima'].str.startswith('9')))
-      & (df_it['Nama Barang']==barang)][['Nomor #Terima','Gudang #Terima','Tanggal #Terima','#Sat. Terkecil','#Qty. Terkecil']]
+      & (df_it['Nama Barang']==barang)][['Nomor #Terima','Gudang #Terima','Tanggal #Terima','#Sat. Terkecil','#Qty. Terkecil']], use_container_width=True, hide_index=True)
+
