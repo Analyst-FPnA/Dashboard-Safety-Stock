@@ -161,6 +161,7 @@ if 'df_cab' not in locals():
         df_cab = pd.read_csv(f)
 
 df = pd.read_csv('all_4208.csv')
+df_it = pd.read_csv('all_4205.csv')
 df['Cabang'] = df['Cabang'].replace({'System)':'Transit (AOL System)'})
 df['Cabang'] = df['Cabang'].str.extract(r'\(([^()]*)\)[^()]*$')
 df = df.merge(df_cab[['Cabang','Nama Cabang']],how='left')
