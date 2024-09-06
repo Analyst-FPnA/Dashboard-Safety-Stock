@@ -165,7 +165,7 @@ df_it = pd.read_csv('all_4205.csv')
 df['Cabang'] = df['Cabang'].replace({'System)':'Transit (AOL System)'})
 df['Cabang'] = df['Cabang'].str.extract(r'\(([^()]*)\)[^()]*$')
 df = df.merge(df_cab[['Cabang','Nama Cabang']],how='left')
-df['Bulan'] = pd.to_datetime(df['Tanggal'],errors='raise').dt.month_name()
+df['Bulan'] = pd.to_datetime(df['Tanggal'],format='%d/%m/%Y',errors='raise').dt.month_name()
 
 list_bulan = [
         'January', 'February', 'March', 'April', 'May', 'June',
