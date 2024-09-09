@@ -222,7 +222,8 @@ def highlight_indikator(val):
     else:
         color = ''
     return color
-    
+df_saldo[f'Pembelian {bulan}'] = df_saldo[f'Pembelian {bulan}'].astype(int)   
+df_saldo[f'Pickup Resto {bulan}'] = df_saldo[f'Pickup Resto {bulan}'].astype(int)
 st.dataframe(df_saldo.style.applymap(highlight_indikator, subset=['Indikator']), use_container_width=True, hide_index=True)
 
 barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), index=0, on_change=reset_button_state)
