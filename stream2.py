@@ -214,11 +214,11 @@ def indikator(row):
 df_saldo['Indikator'] = df_saldo.apply(lambda row: indikator(row), axis=1)
 def highlight_indikator(val):
     if val == 'Hijau':
-        color = 'background-color: green; color: white;'
+        color = 'background-color: green; color: green;'
     elif val == 'Merah':
-        color = 'background-color: red; color: white;'
+        color = 'background-color: red; color: red;'
     elif val == 'Kuning':
-        color = 'background-color: yellow; color: white;'
+        color = 'background-color: yellow; color: yellow;'
     else:
         color = ''
     return color
