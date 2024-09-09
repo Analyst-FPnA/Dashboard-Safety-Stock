@@ -203,8 +203,26 @@ df_saldo = df_saldo.merge(df_4201, how='left').rename(columns={'Total Nama Gudan
 df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standard'})[['Nama Barang','Angka Standard']]
 df_saldo = df_level.merge(df_saldo,how='left')
 df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
-
-st.dataframe(df_saldo, use_container_width=True, hide_index=True)
+def indikator(row):
+    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standard']) & (row[f'Pembelian {bulan}']<=0):
+        return 'Hijau'
+    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standard']) & (row[f'Pembelian {bulan}']>0):
+        return 'Merah'
+    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= row['Angka Standard']):
+        return 'Kuning'
+df_saldo['Indikator'] = df_saldo.apply(lambda row: indikator(row), axis=1)
+def highlight_indikator(val):
+    if val == 'Hijau':
+        color = 'background-color: green; color: green;'
+    elif val == 'Merah':
+        color = 'background-color: red; color: red;'
+    elif val == 'Kuning':
+        color = 'background-color: yellow; color: yellow;'
+    else:
+        color = ''
+    return color
+    
+st.dataframe(df_saldo.style.applymap(highlight_indikator, subset=['Indikator']), use_container_width=True, hide_index=True)
 
 barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), index=0, on_change=reset_button_state)
 #barang = df_saldo['Nama Barang'].values[0]
