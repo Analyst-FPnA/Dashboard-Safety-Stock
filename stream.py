@@ -117,7 +117,7 @@ def list_files_in_directory(dir_path):
 
 
 
-st.title('Dashboard - Safety Stock')
+st.title('Dashboard - Safety Stock & Movement Equipment')
 
 if 'button_clicked' not in st.session_state:
     st.session_state.button_clicked = False
@@ -213,6 +213,7 @@ df_over = df_over.style.format(lambda x: format_number(x)).background_gradient(c
 st.dataframe(df_over, use_container_width=True, hide_index=True)
 st.dataframe(total[['Nama Barang']+total.columns[:-1].tolist()], use_container_width=True, hide_index=True)
 
+st.markdown('####')
 bulan =st.selectbox("BULAN:", list_bulan, index=7, on_change=reset_button_state)
 
 df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(bulan):])) & ((df['Nama Cabang'].str.startswith('H00')) |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
