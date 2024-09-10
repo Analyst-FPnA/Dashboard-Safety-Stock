@@ -176,6 +176,40 @@ list_bulan = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December']
 
+df['Bulan'] = df['Bulan'].bfill()
+dfs = []
+for b in df['Bulan'].unique():
+    if b=='January':
+        df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(b)+1:]))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+        df_saldo = df_saldo[df_saldo['Deskripsi'].str.contains('Saldo')].groupby(['Nama Barang'])[['Masuk']].sum().reset_index().rename(columns={'Masuk':'Saldo Akhir'})
+        df_saldo['Bulan'] = b
+        dfs.append(df_saldo[['Bulan','Nama Barang','Saldo Akhir']])
+    else:
+        df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(b)+1:]))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+        df_saldo = df_saldo.groupby(['Nama Barang'])[['Masuk']].sum().reset_index().merge(df_saldo.groupby(['Nama Barang'])[['Keluar']].sum().reset_index(),how='outer')
+        df_saldo['Saldo Akhir'] =  df_saldo['Masuk'] - df_saldo['Keluar']
+        df_saldo['Bulan'] = b
+        dfs.append(df_saldo[['Bulan','Nama Barang','Saldo Akhir']])
+
+
+df_over = pd.concat(dfs,ignore_index=True)
+df_over = df_over.merge(df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standard'})[['Nama Barang','Angka Standard']],
+              how='left')
+df_over['Overstock'] = df_over['Saldo Akhir'] - df_over['Angka Standard']
+df_over = df_over[df_over['Overstock']>0]
+df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=list_bulan)
+df_over = df_over.sort_values('Bulan')
+df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values='Overstock').reset_index().fillna(0)
+
+def format_number(x):
+    if x==0:
+        return ''
+    if isinstance(x, (int, float)):
+        return "{:,.0f}".format(x)
+    return x
+df_over = df_over.style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_pic.columns[1:])
+st.dataframe(df_over, use_container_width=True, hide_index=True)
+
 bulan =st.selectbox("BULAN:", list_bulan, index=7, on_change=reset_button_state)
 
 df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(bulan):])) & ((df['Nama Cabang'].str.startswith('H00')) |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
