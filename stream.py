@@ -118,6 +118,7 @@ def list_files_in_directory(dir_path):
 
 
 st.title('Dashboard - Safety Stock & Movement Equipment')
+st.markdown('#### Stock Over Standard')
 
 if 'button_clicked' not in st.session_state:
     st.session_state.button_clicked = False
@@ -192,9 +193,9 @@ for b in df['Bulan'].unique():
 
 
 df_over = pd.concat(dfs,ignore_index=True)
-df_over = df_over.merge(df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standard'})[['Nama Barang','Angka Standard']],
+df_over = df_over.merge(df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standart'})[['Nama Barang','Angka Standart']],
               how='left')
-df_over['Overstock'] = df_over['Saldo Akhir'] - df_over['Angka Standard']
+df_over['Overstock'] = df_over['Saldo Akhir'] - df_over['Angka Standart']
 df_over = df_over[df_over['Overstock']>0]
 df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=list_bulan)
 df_over = df_over.sort_values('Bulan')
@@ -239,15 +240,15 @@ df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] = (df_saldo[f
 df_saldo = df_saldo.drop(columns=['Masuk','Keluar'])
 df_saldo.iloc[:,1:] = df_saldo.iloc[:,1:].astype(int)
 df_saldo = df_saldo.merge(df_4201, how='left').rename(columns={'Total Nama Gudang':f'SO 42.01 {bulan}'})
-df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standard'})[['Nama Barang','Angka Standard']]
+df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standart'})[['Nama Barang','Angka Standart']]
 df_saldo = df_level.merge(df_saldo,how='left')
 df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
 def indikator(row):
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standard']) & (row[f'Pembelian {bulan}']<=0):
+    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standart']) & (row[f'Pembelian {bulan}']<=0):
         return 'Hijau'
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standard']) & (row[f'Pembelian {bulan}']>0):
+    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standart']) & (row[f'Pembelian {bulan}']>0):
         return 'Merah'
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= row['Angka Standard']):
+    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= row['Angka Standart']):
         return 'Kuning'
 df_saldo['Indikator'] = df_saldo.apply(lambda row: indikator(row), axis=1)
 def highlight_indikator(val):
