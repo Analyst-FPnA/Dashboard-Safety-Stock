@@ -207,7 +207,7 @@ def format_number(x):
     if isinstance(x, (int, float)):
         return "{:,.0f}".format(x)
     return x
-df_over = df_over.style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_pic.columns[1:])
+df_over = df_over.style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_over.columns[1:])
 st.dataframe(df_over, use_container_width=True, hide_index=True)
 
 bulan =st.selectbox("BULAN:", list_bulan, index=7, on_change=reset_button_state)
