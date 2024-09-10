@@ -207,6 +207,7 @@ def format_number(x):
     if isinstance(x, (int, float)):
         return "{:,.0f}".format(x)
     return x
+    
 df_over = df_over.style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_over.columns[1:])
 st.dataframe(df_over, use_container_width=True, hide_index=True)
 
