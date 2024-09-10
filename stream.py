@@ -200,7 +200,7 @@ df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=list_bulan)
 df_over = df_over.sort_values('Bulan')
 df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values='Overstock').reset_index().fillna(0)
 total = pd.DataFrame((df_over.iloc[:,1:].sum(axis=0).values).reshape(1,len(df_over.columns)-1),columns=df_over.columns[1:])
-total['Nama Barang']='TOTAL'+(df_over['Nama Barang'].str.len().max()+8)*' '
+total['Nama Barang']='TOTAL'+(df_over['Nama Barang'].str.len().max())*' '
 
 def format_number(x):
     if x==0:
