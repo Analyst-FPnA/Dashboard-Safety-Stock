@@ -209,7 +209,7 @@ def format_number(x):
         return "{:,.0f}".format(x)
     return x
     
-st.dataframe(total.style.background_gradient(cmap='Reds', axis=1, subset=total.columns[1:], use_container_width=True, hide_index=True)   
+st.dataframe(total.style.background_gradient(cmap='Reds', axis=1, subset=total.columns[1:]), use_container_width=True, hide_index=True)   
 df_over = df_over.fillna(0).style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_over.columns[1:])
 st.dataframe(df_over, use_container_width=True, hide_index=True)
 
