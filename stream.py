@@ -199,9 +199,8 @@ df_over['Overstock'] = df_over['Saldo Akhir'] - df_over['Angka Standart']
 df_over = df_over[df_over['Overstock']>0]
 df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=list_bulan)
 df_over = df_over.sort_values('Bulan')
-df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values='Overstock').reset_index().fillna(0)
-total = pd.DataFrame((df_over.iloc[:,1:].sum(axis=0).values).reshape(1,len(df_over.columns)-1),columns=df_over.columns[1:])
-total['Nama Barang']='TOTAL'+(df_over['Nama Barang'].str.len().max())*' '
+df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values='Overstock').reset_index()#.fillna(0)
+total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].count(axis=0).values.tolist()],columns=df_over.columns)
 
 def format_number(x):
     if x==0:
@@ -210,9 +209,10 @@ def format_number(x):
         return "{:,.0f}".format(x)
     return x
     
-df_over = df_over.style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_over.columns[1:])
+st.dataframe(total, use_container_width=True, hide_index=True)   
+df_over = df_over.fillna(0).style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_over.columns[1:])
 st.dataframe(df_over, use_container_width=True, hide_index=True)
-st.dataframe(total[['Nama Barang']+total.columns[:-1].tolist()], use_container_width=True, hide_index=True)
+
 
 st.markdown('####')
 bulan =st.selectbox("BULAN:", list_bulan, index=7, on_change=reset_button_state)
