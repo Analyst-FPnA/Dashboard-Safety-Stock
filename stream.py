@@ -215,7 +215,7 @@ st.dataframe(df_over, use_container_width=True, hide_index=True)
 
 
 st.markdown('####')
-bulan =st.selectbox("BULAN:", list_bulan, index=7, on_change=reset_button_state)
+bulan =st.selectbox("BULAN:", list_bulan, index=8, on_change=reset_button_state)
 
 df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(bulan):])) & ((df['Nama Cabang'].str.startswith('H00')) |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
 df_saldo = df_saldo.groupby('Nama Barang')[['Masuk']].sum().reset_index().merge(df_saldo.groupby('Nama Barang')[['Keluar']].sum().reset_index(),how='outer')
