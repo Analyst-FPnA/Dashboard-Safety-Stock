@@ -8,6 +8,7 @@ import gdown
 import tempfile
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 import plotly.graph_objs as go
 import streamlit as st
@@ -253,15 +254,16 @@ df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','L
 df_saldo = df_level.merge(df_saldo,how='left').merge(df_std,how='left')
 df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
 def indikator(row):
-    markup = ((row['Keluar']*(10/100))+row['Keluar'])
-    bm = markup + (markup*(5/100))
-    ba = markup - (markup*(5/100))
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] >= bm) & (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= ba):
-        return 'Hijau'
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > ba):
-        return 'Merah'
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] < bm):
-        return 'Kuning'
+    if row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']!=np.nan:
+        markup = np.round((row['Keluar']*(10/100))+row['Keluar'])
+        bm = markup + np.round(markup*(5/100))
+        ba = markup - np.round(markup*(5/100))
+        if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] >= bm) & (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= ba):
+            return 'Hijau'
+        if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > ba):
+            return 'Merah'
+        if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] < bm):
+            return 'Kuning'
         
 df_saldo['Indikator'] = df_saldo.apply(lambda row: indikator(row), axis=1)
 def highlight_indikator(val):
