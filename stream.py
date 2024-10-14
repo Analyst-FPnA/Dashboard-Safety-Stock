@@ -281,7 +281,7 @@ def format_number(x):
     if isinstance(x, (int, float)):
         return "{:,.0f}".format(x)
     return x
-st.dataframe(df_saldo.drop(columns='Keluar').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['Indikator']), use_container_width=True, hide_index=True)
+st.dataframe(df_saldo.rename(columns={'Keluar':f'Avg Pickup Resto {list_bulan[list_bulan.index(bulan)-6][:3]} - {list_bulan[list_bulan.index(bulan)-1][:3]}').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['Indikator']), use_container_width=True, hide_index=True)
 
 barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), index=0, on_change=reset_button_state)
 #barang = df_saldo['Nama Barang'].values[0]
