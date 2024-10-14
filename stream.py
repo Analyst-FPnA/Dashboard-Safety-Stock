@@ -253,14 +253,14 @@ df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','L
 df_saldo = df_level.merge(df_saldo,how='left').merge(df_std,how='left')
 df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
 def indikator(row):
-    markup = ((row['Keluar']*(5/100))+row['Keluar'])
+    markup = ((row['Keluar']*(10/100))+row['Keluar'])
     bm = markup + (markup*(5/100))
     ba = markup - (markup*(5/100))
-    if (row[f'Pickup Resto {bulan}'] >= bm) & (row[f'Pickup Resto {bulan}'] <= ba):
+    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] >= bm) & (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= ba):
         return 'Hijau'
-    if (row[f'Pickup Resto {bulan}'] > ba):
+    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > ba):
         return 'Merah'
-    if (row[f'Pickup Resto {bulan}'] < bm):
+    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] < bm):
         return 'Kuning'
         
 df_saldo['Indikator'] = df_saldo.apply(lambda row: indikator(row), axis=1)
