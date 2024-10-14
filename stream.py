@@ -217,6 +217,15 @@ st.dataframe(df_over, use_container_width=True, hide_index=True)
 st.markdown('####')
 bulan =st.selectbox("BULAN:", list_bulan, index=8, on_change=reset_button_state)
 
+df_tab = df[(df['Bulan'].isin(list_bulan[list_bulan.index(bulan)-6:list_bulan.index(bulan)])) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+df_saldo = df_saldo.merge(df_tab[(df_tab['Nomor #'].str.contains('RI.')) | (df_tab['Nomor #'].str.contains('PI.'))].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian {bulan}'}), how='left')
+df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
+df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
+df_std = df_kirim[(df_kirim['Gudang #Terima'].str.contains('|'.join(df_cab[(df_cab['Nama Cabang'].str.startswith('1')) | (df_cab['Nama Cabang'].str.startswith('9'))]['Nama Cabang'].str[:6].values)))]
+df_std = df_std.groupby(['Nama Barang','Bulan_x'])[['Keluar']].sum().reset_index()
+df_std = df_std[df_std['Keluar']>0]
+df_std = df_std.groupby('Nama Barang')[['Keluar']].mean().astype('int').reset_index()
+
 df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(bulan):])) & ((df['Nama Cabang'].str.startswith('H00')) |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
 df_saldo = df_saldo.groupby('Nama Barang')[['Masuk']].sum().reset_index().merge(df_saldo.groupby('Nama Barang')[['Keluar']].sum().reset_index(),how='outer')
 df_saldo[f'SO Awal Bulan {bulan}'] =  (df_saldo['Masuk'] - df_saldo['Keluar']).astype('int')
@@ -244,12 +253,16 @@ df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','L
 df_saldo = df_level.merge(df_saldo,how='left')
 df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
 def indikator(row):
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standart']) & (row[f'Pembelian {bulan}']<=0):
+    markup = ((row['Keluar']*(5/100))+row['Keluar'])
+    bm = markup + (markup*(5/100))
+    ba = markup - (markup*(5/100))
+    if (row[f'Pickup Resto {bulan}'] >= bm) & (row[f'Pickup Resto {bulan}'] <= ba):
         return 'Hijau'
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standart']) & (row[f'Pembelian {bulan}']>0):
+    if (row[f'Pickup Resto {bulan}'] > ba):
         return 'Merah'
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= row['Angka Standart']):
+    if (row[f'Pickup Resto {bulan}'] < bm):
         return 'Kuning'
+        
 df_saldo['Indikator'] = df_saldo.apply(lambda row: indikator(row), axis=1)
 def highlight_indikator(val):
     if val == 'Hijau':
@@ -263,7 +276,7 @@ def highlight_indikator(val):
     return color
 df_saldo[f'Pembelian {bulan}'] = df_saldo[f'Pembelian {bulan}'].fillna(0).astype(int)   
 df_saldo[f'Pickup Resto {bulan}'] = df_saldo[f'Pickup Resto {bulan}'].fillna(0).astype(int)
-st.dataframe(df_saldo.style.applymap(highlight_indikator, subset=['Indikator']), use_container_width=True, hide_index=True)
+st.dataframe(df_saldo.drop(columns='Keluar').style.applymap(highlight_indikator, subset=['Indikator']), use_container_width=True, hide_index=True)
 
 barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), index=0, on_change=reset_button_state)
 #barang = df_saldo['Nama Barang'].values[0]
