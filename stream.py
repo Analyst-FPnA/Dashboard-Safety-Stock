@@ -253,9 +253,9 @@ df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','L
 df_saldo = df_level.merge(df_saldo,how='left').merge(df_std,how='left')
 df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
 def indikator(row):
-    markup = round((row['Keluar']*(10/100))+row['Keluar'])
-    bm = round(markup + (markup*(5/100)))
-    ba = round(markup - (markup*(5/100)))
+    markup = ((row['Keluar']*(10/100))+row['Keluar'])
+    bm = markup + (markup*(5/100))
+    ba = markup - (markup*(5/100))
     if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] >= bm) & (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= ba):
         return 'Hijau'
     if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > ba):
