@@ -278,12 +278,10 @@ df_saldo[f'Pembelian {bulan}'] = df_saldo[f'Pembelian {bulan}'].fillna(0).astype
 df_saldo[f'Pickup Resto {bulan}'] = df_saldo[f'Pickup Resto {bulan}'].fillna(0).astype(int)
 
 def format_number(x):
-    if x==0:
-        return ''
     if isinstance(x, (int, float)):
         return "{:,.0f}".format(x)
     return x
-st.dataframe(df_saldo.drop(columns='Keluar').style.format(lambda x: "{:,.0f}".format(x)).applymap(highlight_indikator, subset=['Indikator']), use_container_width=True, hide_index=True)
+st.dataframe(df_saldo.drop(columns='Keluar').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['Indikator']), use_container_width=True, hide_index=True)
 
 barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), index=0, on_change=reset_button_state)
 #barang = df_saldo['Nama Barang'].values[0]
