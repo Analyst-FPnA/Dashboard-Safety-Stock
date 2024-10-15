@@ -141,6 +141,7 @@ if not os.path.exists('all_4208.csv'):
     with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
           df_4208 = []
           df_4205 = []
+          df_9901 = []
           for file in z.namelist():
             if file.startswith('42.08'):  
               # Loop untuk membaca setiap file di dalam ZIP
@@ -154,10 +155,17 @@ if not os.path.exists('all_4208.csv'):
                       # Membaca setiap file Excel ke dalam DataFrame
                       df = pd.read_excel(f)
                       df_4205.append(df)
+            if file.startswith('99.01'):  
+              # Loop untuk membaca setiap file di dalam ZIP
+                  with z.open(file) as f:
+                      # Membaca setiap file Excel ke dalam DataFrame
+                      df = pd.read_excel(f)
+                      df_9901.append(df)
                     
           # Menggabungkan semua DataFrame
           pd.concat(df_4208, ignore_index=True).to_csv('all_4208.csv',index=False)
           pd.concat(df_4205, ignore_index=True).to_csv('all_4205.csv',index=False)
+          pd.concat(df_9901, ignore_index=True).to_csv('all_9901.csv',index=False)
         
 if 'df_cab' not in locals():
   with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
@@ -178,6 +186,14 @@ list_bulan = [
         'July', 'August', 'September', 'October', 'November', 'December']
 
 df['Bulan'] = df['Bulan'].bfill()
+with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
+    with z.open(f'4201_September.xlsx') as f:
+        df_4201 = pd.read_excel(f,header=4).loc[1:,['Nama Barang','Total Nama Gudang']]
+
+df_9901 = pd.read_csv('all_9901.csv')
+df_9901['Tanggal']  = pd.to_datetime(df_9901['Tanggal'])
+df_9901['#Purch.@Price'] = df_9901['#Purch.@Price'].astype(float)
+
 dfs = []
 for b in df['Bulan'].unique():
     if b=='January':
@@ -191,17 +207,31 @@ for b in df['Bulan'].unique():
         df_saldo['Saldo Akhir'] =  df_saldo['Masuk'] - df_saldo['Keluar']
         df_saldo['Bulan'] = b
         dfs.append(df_saldo[['Bulan','Nama Barang','Saldo Akhir']])
-
-
 df_over = pd.concat(dfs,ignore_index=True)
-df_over = df_over.merge(df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standart'})[['Nama Barang','Angka Standart']],
-              how='left')
-df_over['Overstock'] = df_over['Saldo Akhir'] - df_over['Angka Standart']
-df_over = df_over[df_over['Overstock']>0]
-df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=list_bulan)
-df_over = df_over.sort_values('Bulan')
-df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values='Overstock').reset_index()#.fillna(0)
-total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].count(axis=0).values.tolist()],columns=df_over.columns)
+
+dfs=[]
+for b in ['July','August','September']:
+    df_tab = df[(df['Bulan'].isin(list_bulan[list_bulan.index(b)-6:list_bulan.index(b)])) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+    df_saldo = df_saldo.merge(df_tab[(df_tab['Nomor #'].str.contains('RI.')) | (df_tab['Nomor #'].str.contains('PI.'))].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian {bulan}'}), how='left')
+    df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
+    df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
+    df_std = df_kirim[(df_kirim['Gudang #Terima'].str.contains('|'.join(df_cab[(df_cab['Nama Cabang'].str.startswith('1')) | (df_cab['Nama Cabang'].str.startswith('9'))]['Nama Cabang'].str[:6].values)))]
+    df_std = df_std.groupby(['Nama Barang','Bulan'])[['Keluar']].sum().reset_index()
+    df_std = df_std[df_std['Keluar']>0]
+    df_std = df_std.groupby(['Nama Barang'])[['Keluar']].mean().astype('int').reset_index()
+    df_std['Keluar'] = ((df_std['Keluar'].fillna(0)*0.1)+df_std['Keluar'].fillna(0)).astype(int)
+    df_std['Month'] = b
+    df_std = df_std.merge(df_4201[['Kode Barang','Nama Barang']].drop_duplicates(),how='left')
+    df_std['Kode Barang'] = df_std['Kode Barang'].astype('int').astype('str')
+    data = df_9901[df_9901['Tanggal']<pd.to_datetime(f'{list_bulan[list_bulan.index(b)+1]} 2024',format='%B %Y')].sort_values(['Tanggal','Kode #','#Purch.@Price'],ascending=False).drop_duplicates(subset=['Kode #'])
+    data['Kode #'] = data['Kode #'].astype('int').astype('str')
+    df_std = df_std.merge(data[['Kode #','#Purch.@Price']],how='left',left_on=['Kode Barang'],right_on=['Kode #'])
+    dfs.append(df_std)
+
+#df_over = df_over.merge(df_std,how='left')
+
+#df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values='Overstock').reset_index()#.fillna(0)
+#total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].count(axis=0).values.tolist()],columns=df_over.columns)
 
 def format_number(x):
     if x==0:
@@ -209,6 +239,15 @@ def format_number(x):
     if isinstance(x, (int, float)):
         return "{:,.0f}".format(x)
     return x
+
+df_over = df_over.merge(pd.concat(dfs,ignore_index=True).rename(columns={'Month':'Bulan'}))
+df_over['Kuantitas'] = df_over['Saldo Akhir'] - df_over['Keluar']
+df_over = df_over[df_over['Kuantitas']>0]
+df_over['Nominal'] = df_over['Kuantitas']*df_over['#Purch.@Price']
+agg =st.selectbox("KUANTITAS/NOMINAL:", ['Kuantitas','Nominal'], index=0, on_change=reset_button_state)
+df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=list_bulan)
+df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values=agg).reset_index()
+total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].count(axis=0).values.tolist()],columns=df_over.columns)
     
 st.dataframe(total.style.background_gradient(cmap='Reds', axis=1, subset=total.columns[1:]), use_container_width=True, hide_index=True)   
 df_over = df_over.fillna(0).style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_over.columns[1:])
