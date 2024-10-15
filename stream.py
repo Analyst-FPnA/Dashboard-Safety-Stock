@@ -249,8 +249,12 @@ agg =st.selectbox("KUANTITAS/NOMINAL:", ['Kuantitas','Nominal'], index=0, on_cha
 df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=df.sort_values('Tanggal')['Bulan'].unique().tolist())
 df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values=agg).reset_index()
 
-total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].count(axis=0).values.tolist()],columns=df_over.columns)
-    
+if agg=='Kuantitas':
+    total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].count(axis=0).values.tolist()],columns=df_over.columns)
+else:
+    total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].sum(axis=0).values.tolist()],columns=df_over.columns)
+
+
 st.dataframe(total.style.background_gradient(cmap='Reds', axis=1, subset=total.columns[1:]), use_container_width=True, hide_index=True)   
 df_over = df_over.fillna(0).style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_over.columns[1:])
 st.dataframe(df_over, use_container_width=True, hide_index=True)
