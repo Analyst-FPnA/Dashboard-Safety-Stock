@@ -180,7 +180,7 @@ df['Cabang'] = df['Cabang'].replace({'System)':'Transit (AOL System)'})
 df['Cabang'] = df['Cabang'].str.extract(r'\(([^()]*)\)[^()]*$')
 df = df.merge(df_cab[['Cabang','Nama Cabang']],how='left')
 df['Tanggal']=pd.to_datetime(df['Tanggal'],format="%d/%m/%Y",errors='raise')
-df['Bulan'] = df['Tanggal'].dt.month_name()
+df['Bulan'] = df['Tanggal'].dt.strftime('%B %Y')
 
 list_bulan = [
         'January', 'February', 'March', 'April', 'May', 'June',
