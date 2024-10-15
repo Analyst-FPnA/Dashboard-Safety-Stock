@@ -198,12 +198,12 @@ df_9901['#Purch.@Price'] = df_9901['#Purch.@Price'].astype(float)
 dfs = []
 for b in df['Bulan'].unique():
     if b=='January 2024':
-        df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{b}',format='%B %Y'))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+        df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{b}',format='%B %Y')+pd.DateOffset(months=1))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
         df_saldo = df_saldo[df_saldo['Deskripsi'].str.contains('Saldo')].groupby(['Nama Barang'])[['Masuk']].sum().reset_index().rename(columns={'Masuk':'Saldo Akhir'})
         df_saldo['Bulan'] = b
         dfs.append(df_saldo[['Bulan','Nama Barang','Saldo Akhir']])
     else:
-        df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{b}',format='%B %Y'))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+        df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{b}',format='%B %Y')+pd.DateOffset(months=1))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
         df_saldo = df_saldo.groupby(['Nama Barang'])[['Masuk']].sum().reset_index().merge(df_saldo.groupby(['Nama Barang'])[['Keluar']].sum().reset_index(),how='outer')
         df_saldo['Saldo Akhir'] =  df_saldo['Masuk'] - df_saldo['Keluar']
         df_saldo['Bulan'] = b
