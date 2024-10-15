@@ -259,7 +259,7 @@ st.dataframe(df_over, use_container_width=True, hide_index=True)
 st.markdown('####')
 bulan =st.selectbox("BULAN:", list_bulan, index=8, on_change=reset_button_state)
 bulan += ' 2024'
-df_tab = df[(df['Tanggal']>=pd.to_datetime(f'{bulan}',format='%B %Y')-pd.DateOffset(months=6)) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+df_tab = df[(df['Tanggal']>=pd.to_datetime(f'{bulan}',format='%B %Y')-pd.DateOffset(months=6)) &(df['Tanggal']<pd.to_datetime(f'{bulan}',format='%B %Y')) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
 df_saldo = df_saldo.merge(df_tab[(df_tab['Nomor #'].str.contains('RI.')) | (df_tab['Nomor #'].str.contains('PI.'))].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian {bulan}'}), how='left')
 df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
 df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
