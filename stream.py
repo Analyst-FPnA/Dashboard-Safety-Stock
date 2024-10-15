@@ -212,7 +212,7 @@ df_over = pd.concat(dfs,ignore_index=True)
 dfs=[]
 for b in ['July','August','September']:
     df_tab = df[(df['Bulan'].isin(list_bulan[list_bulan.index(b)-6:list_bulan.index(b)])) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
-    df_saldo = df_saldo.merge(df_tab[(df_tab['Nomor #'].str.contains('RI.')) | (df_tab['Nomor #'].str.contains('PI.'))].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian {bulan}'}), how='left')
+    df_saldo = df_saldo.merge(df_tab[(df_tab['Nomor #'].str.contains('RI.')) | (df_tab['Nomor #'].str.contains('PI.'))].groupby('Nama Barang')[['Masuk']].sum().reset_index(), how='left')
     df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
     df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
     df_std = df_kirim[(df_kirim['Gudang #Terima'].str.contains('|'.join(df_cab[(df_cab['Nama Cabang'].str.startswith('1')) | (df_cab['Nama Cabang'].str.startswith('9'))]['Nama Cabang'].str[:6].values)))]
