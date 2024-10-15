@@ -194,19 +194,32 @@ with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
 df_9901 = pd.read_csv('all_9901.csv')
 df_9901['Tanggal']  = pd.to_datetime(df_9901['Tanggal'])
 df_9901['#Purch.@Price'] = df_9901['#Purch.@Price'].astype(float)
-
 dfs = []
 for b in df['Bulan'].unique():
+    
     if b=='January 2024':
         df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{b}',format='%B %Y')+pd.DateOffset(months=1))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
         df_saldo = df_saldo[df_saldo['Deskripsi'].str.contains('Saldo')].groupby(['Nama Barang'])[['Masuk']].sum().reset_index().rename(columns={'Masuk':'Saldo Akhir'})
         df_saldo['Bulan'] = b
         dfs.append(df_saldo[['Bulan','Nama Barang','Saldo Akhir']])
     else:
-        df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{b}',format='%B %Y')+pd.DateOffset(months=1))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+        df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{b}',format='%B %Y'))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
         df_saldo = df_saldo.groupby(['Nama Barang'])[['Masuk']].sum().reset_index().merge(df_saldo.groupby(['Nama Barang'])[['Keluar']].sum().reset_index(),how='outer')
-        df_saldo['Saldo Akhir'] =  df_saldo['Masuk'] - df_saldo['Keluar']
+        df_saldo['Saldo Awal'] =  df_saldo['Masuk'] - df_saldo['Keluar']
         df_saldo['Bulan'] = b
+        df_tab = df[(df['Bulan'] == (pd.to_datetime(f'{b}',format='%B %Y')).strftime('%B %Y')) & ((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+        df_saldo = df_saldo.merge(df_tab[df_tab['Deskripsi'].str.contains('Penerimaan')].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian'}), how='left')
+        df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
+        df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
+        #st.dataframe(df_kirim)
+        df_kirim = df_kirim[(df_kirim['Gudang #Terima'].str.contains('|'.join(df_cab[(df_cab['Nama Cabang'].str.startswith('1')) | (df_cab['Nama Cabang'].str.startswith('9'))]['Cabang']),case=False))]
+
+        df_saldo = df_saldo.merge(df_kirim.groupby('Nama Barang')[['Keluar']].sum().reset_index().rename(columns={'Keluar':f'Pickup Resto'}),how='left')
+
+
+        df_saldo = df_saldo.fillna(0)
+        df_saldo[f'Saldo Akhir'] = (df_saldo[f'Saldo Awal'] + df_saldo[f'Pembelian'] - df_saldo[f'Pickup Resto']).astype(int)
+
         dfs.append(df_saldo[['Bulan','Nama Barang','Saldo Akhir']])
 df_over = pd.concat(dfs,ignore_index=True)
 
@@ -220,7 +233,7 @@ for b in ['July 2024','August 2024','September 2024']:
     df_std = df_std.groupby(['Nama Barang','Bulan'])[['Keluar']].sum().reset_index()
     df_std = df_std[df_std['Keluar']>0]
     df_std = df_std.groupby(['Nama Barang'])[['Keluar']].mean().astype('int').reset_index()
-    df_std['Keluar'] = ((df_std['Keluar'].fillna(0)*0.1)+df_std['Keluar'].fillna(0)).astype(int)
+    df_std['Keluar'] = (round(df_std['Keluar'].fillna(0)*0.1)+df_std['Keluar'].fillna(0))#.astype(int)
     df_std['Month'] = b
     df_std = df_std.merge(df_4201[['Kode Barang','Nama Barang']].drop_duplicates(),how='left')
     df_std['Kode Barang'] = df_std['Kode Barang'].astype('int').astype('str')
@@ -255,9 +268,9 @@ else:
     total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].sum(axis=0).values.tolist()],columns=df_over.columns)
 
 
-#st.dataframe(total.style.background_gradient(cmap='Reds', axis=1, subset=total.columns[1:]), use_container_width=True, hide_index=True)   
+st.dataframe(total.style.background_gradient(cmap='Reds', axis=1, subset=total.columns[1:]), use_container_width=True, hide_index=True)   
 df_over = df_over.fillna(0).style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_over.columns[1:])
-#st.dataframe(df_over, use_container_width=True, hide_index=True)
+st.dataframe(df_over, use_container_width=True, hide_index=True)
 
 
 st.markdown('####')
