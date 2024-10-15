@@ -271,8 +271,9 @@ df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{bulan}',format='%B %Y')) & ((df['
 df_saldo = df_saldo.groupby('Nama Barang')[['Masuk']].sum().reset_index().merge(df_saldo.groupby('Nama Barang')[['Keluar']].sum().reset_index(),how='outer')
 df_saldo[f'SO Awal Bulan {bulan}'] =  (df_saldo['Masuk'] - df_saldo['Keluar']).astype('int')
 df_saldo[f'SO Awal Bulan {bulan}'] = df_saldo[f'SO Awal Bulan {bulan}'].astype('int')
+st.write(bulan)
+st.dataframe(df.head())
 df_tab = df[(df['Bulan'] == bulan) & ((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
-st.dataframe(df_tab)
 df_saldo = df_saldo.merge(df_tab[df_tab['Deskripsi'].str.contains('Penerimaan')].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian {bulan}'}), how='left')
 df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
 df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
