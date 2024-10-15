@@ -197,13 +197,13 @@ df_9901['#Purch.@Price'] = df_9901['#Purch.@Price'].astype(float)
 
 dfs = []
 for b in df['Bulan'].unique():
-    if b=='January':
-        df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(b)+1:]))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+    if b=='January 2024':
+        df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{bulan}',format='%B %Y'))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
         df_saldo = df_saldo[df_saldo['Deskripsi'].str.contains('Saldo')].groupby(['Nama Barang'])[['Masuk']].sum().reset_index().rename(columns={'Masuk':'Saldo Akhir'})
         df_saldo['Bulan'] = b
         dfs.append(df_saldo[['Bulan','Nama Barang','Saldo Akhir']])
     else:
-        df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(b)+1:]))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+        df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{bulan}',format='%B %Y'))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
         df_saldo = df_saldo.groupby(['Nama Barang'])[['Masuk']].sum().reset_index().merge(df_saldo.groupby(['Nama Barang'])[['Keluar']].sum().reset_index(),how='outer')
         df_saldo['Saldo Akhir'] =  df_saldo['Masuk'] - df_saldo['Keluar']
         df_saldo['Bulan'] = b
@@ -211,8 +211,8 @@ for b in df['Bulan'].unique():
 df_over = pd.concat(dfs,ignore_index=True)
 
 dfs=[]
-for b in ['July','August','September']:
-    df_tab = df[(df['Bulan'].isin(list_bulan[list_bulan.index(b)-6:list_bulan.index(b)])) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+for b in ['July 2024','August 2024','September 2024']:
+    df_tab = df[(df['Tanggal']>=pd.to_datetime(f'{bulan}',format='%B %Y')-pd.DateOffset(months=6)) & (df['Tanggal']<pd.to_datetime(f'{bulan}',format='%B %Y')) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
     df_saldo = df_saldo.merge(df_tab[(df_tab['Nomor #'].str.contains('RI.')) | (df_tab['Nomor #'].str.contains('PI.'))].groupby('Nama Barang')[['Masuk']].sum().reset_index(), how='left')
     df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
     df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
