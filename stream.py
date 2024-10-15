@@ -246,7 +246,7 @@ df_over['Kuantitas'] = df_over['Saldo Akhir'] - df_over['Keluar']
 df_over = df_over[df_over['Kuantitas']>0]
 df_over['Nominal'] = df_over['Kuantitas']*df_over['#Purch.@Price']
 agg =st.selectbox("KUANTITAS/NOMINAL:", ['Kuantitas','Nominal'], index=0, on_change=reset_button_state)
-df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=list_bulan)
+df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=df.sort_values('Tanggal')['Bulan'].unique().tolist())
 st.dataframe(df_over)
 df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values=agg).reset_index()
 
