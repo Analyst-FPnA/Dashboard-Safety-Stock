@@ -179,7 +179,8 @@ df_it = pd.read_csv('all_4205.csv')
 df['Cabang'] = df['Cabang'].replace({'System)':'Transit (AOL System)'})
 df['Cabang'] = df['Cabang'].str.extract(r'\(([^()]*)\)[^()]*$')
 df = df.merge(df_cab[['Cabang','Nama Cabang']],how='left')
-df['Bulan'] = pd.to_datetime(df['Tanggal'],format='%d/%m/%Y',errors='raise').dt.month_name()
+df['Tanggal']=pd.to_datetime(df['Tanggal'],format="%d/%m/%Y",errors='raise')
+df['Bulan'] = df['Tanggal'].dt.month_name()
 
 list_bulan = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -256,8 +257,8 @@ st.dataframe(df_over, use_container_width=True, hide_index=True)
 
 st.markdown('####')
 bulan =st.selectbox("BULAN:", list_bulan, index=8, on_change=reset_button_state)
-
-df_tab = df[(df['Bulan'].isin(list_bulan[list_bulan.index(bulan)-6:list_bulan.index(bulan)])) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+bulan += ' 2024'
+df_tab = df[(df['Tanggal']>=pd.to_datetime(f'{bulan}',format='%B %Y')-pd.DateOffset(months=6)) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
 df_saldo = df_saldo.merge(df_tab[(df_tab['Nomor #'].str.contains('RI.')) | (df_tab['Nomor #'].str.contains('PI.'))].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian {bulan}'}), how='left')
 df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
 df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
@@ -266,7 +267,7 @@ df_std = df_std.groupby(['Nama Barang','Bulan'])[['Keluar']].sum().reset_index()
 df_std = df_std[df_std['Keluar']>0]
 df_std = df_std.groupby('Nama Barang')[['Keluar']].mean().astype('int').reset_index()
 
-df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(bulan):])) & ((df['Nama Cabang'].str.startswith('H00')) |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{bulan}',format='%B %Y')) & ((df['Nama Cabang'].str.startswith('H00')) |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
 df_saldo = df_saldo.groupby('Nama Barang')[['Masuk']].sum().reset_index().merge(df_saldo.groupby('Nama Barang')[['Keluar']].sum().reset_index(),how='outer')
 df_saldo[f'SO Awal Bulan {bulan}'] =  (df_saldo['Masuk'] - df_saldo['Keluar']).astype('int')
 df_saldo[f'SO Awal Bulan {bulan}'] = df_saldo[f'SO Awal Bulan {bulan}'].astype('int')
@@ -285,23 +286,23 @@ with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
 
 
 df_saldo = df_saldo.fillna(0)
-df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] = (df_saldo[f'SO Awal Bulan {bulan}'] + df_saldo[f'Pembelian {bulan}'] - df_saldo[f'Pickup Resto {bulan}']).astype(int)
+df_saldo[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] = (df_saldo[f'SO Awal Bulan {bulan}'] + df_saldo[f'Pembelian {bulan}'] - df_saldo[f'Pickup Resto {bulan}']).astype(int)
 df_saldo = df_saldo.drop(columns=['Masuk','Keluar'])
 df_saldo.iloc[:,1:] = df_saldo.iloc[:,1:].astype(int)
 df_saldo = df_saldo.merge(df_4201, how='left').rename(columns={'Total Nama Gudang':f'SO 42.01 {bulan}'})
 df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standart'})[['Nama Barang','Angka Standart']]
 df_saldo = df_level.merge(df_saldo,how='left').merge(df_std,how='left')
-df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
+df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}']
 def indikator(row):
-    if row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']!=np.nan:
+    if row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}']!=np.nan:
         markup = np.round((row['Keluar']*(10/100))+row['Keluar'])
         bm = markup + np.round(markup*(5/100))
         ba = markup - np.round(markup*(5/100))
-        if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] >= bm) & (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= ba):
+        if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] >= bm) & (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] <= ba):
             return 'Hijau'
-        if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > ba):
+        if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] > ba):
             return 'Merah'
-        if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] < bm):
+        if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] < bm):
             return 'Kuning'
         
 df_saldo['Indikator'] = df_saldo.apply(lambda row: indikator(row), axis=1)
