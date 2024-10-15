@@ -188,7 +188,7 @@ list_bulan = [
 df['Bulan'] = df['Bulan'].bfill()
 with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
     with z.open(f'4201_September.xlsx') as f:
-        df_4201 = pd.read_excel(f,header=4).loc[1:,['Nama Barang','Total Nama Gudang']]
+        df_4201 = pd.read_excel(f,header=4).loc[1:,['Kode Barang','Nama Barang','Total Nama Gudang']]
 
 df_9901 = pd.read_csv('all_9901.csv')
 df_9901['Tanggal']  = pd.to_datetime(df_9901['Tanggal'])
