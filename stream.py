@@ -247,7 +247,9 @@ df_over = df_over[df_over['Kuantitas']>0]
 df_over['Nominal'] = df_over['Kuantitas']*df_over['#Purch.@Price']
 agg =st.selectbox("KUANTITAS/NOMINAL:", ['Kuantitas','Nominal'], index=0, on_change=reset_button_state)
 df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=list_bulan)
+st.dataframe(df_over)
 df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values=agg).reset_index()
+
 total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].count(axis=0).values.tolist()],columns=df_over.columns)
     
 st.dataframe(total.style.background_gradient(cmap='Reds', axis=1, subset=total.columns[1:]), use_container_width=True, hide_index=True)   
