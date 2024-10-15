@@ -159,7 +159,7 @@ if not os.path.exists('all_4208.csv'):
               # Loop untuk membaca setiap file di dalam ZIP
                   with z.open(file) as f:
                       # Membaca setiap file Excel ke dalam DataFrame
-                      df = pd.read_excel(f)
+                      df = pd.read_csv(f)
                       df_9901.append(df)
                     
           # Menggabungkan semua DataFrame
