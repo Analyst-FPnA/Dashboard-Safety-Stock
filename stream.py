@@ -247,7 +247,6 @@ df_over = df_over[df_over['Kuantitas']>0]
 df_over['Nominal'] = df_over['Kuantitas']*df_over['#Purch.@Price']
 agg =st.selectbox("KUANTITAS/NOMINAL:", ['Kuantitas','Nominal'], index=0, on_change=reset_button_state)
 df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=df.sort_values('Tanggal')['Bulan'].unique().tolist())
-st.dataframe(df_over)
 df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values=agg).reset_index()
 
 total = pd.DataFrame([['TOTAL BARANG OVERSTOK']+df_over.iloc[:,1:].count(axis=0).values.tolist()],columns=df_over.columns)
@@ -273,8 +272,6 @@ df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{bulan}',format='%B %Y')) & ((df['
 df_saldo = df_saldo.groupby('Nama Barang')[['Masuk']].sum().reset_index().merge(df_saldo.groupby('Nama Barang')[['Keluar']].sum().reset_index(),how='outer')
 df_saldo[f'SO Awal Bulan {bulan}'] =  (df_saldo['Masuk'] - df_saldo['Keluar']).astype('int')
 df_saldo[f'SO Awal Bulan {bulan}'] = df_saldo[f'SO Awal Bulan {bulan}'].astype('int')
-st.write(bulan)
-st.dataframe(df.head())
 df_tab = df[(df['Bulan'] == bulan) & ((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
 df_saldo = df_saldo.merge(df_tab[df_tab['Deskripsi'].str.contains('Penerimaan')].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian {bulan}'}), how='left')
 df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
@@ -332,7 +329,7 @@ st.dataframe(df_saldo.rename(columns={'Keluar':f'Avg Pickup Resto'}).iloc[:,[0,1
 barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), index=0, on_change=reset_button_state)
 #barang = df_saldo['Nama Barang'].values[0]
 
-df_it['Bulan'] = pd.to_datetime(df_it['Tanggal #Terima'], format='%d %b %Y').dt.strftime('%B')
+df_it['Bulan'] = pd.to_datetime(df_it['Tanggal #Terima'], format='%d %b %Y').dt.strftime('%B %Y')
 st.dataframe(df_it[(df_it['Bulan']==bulan)&((df_it['Gudang #Kirim'].str.startswith('2')) | (df_it['Gudang #Kirim'].str.startswith('5')))
       & ((df_it['Gudang #Terima'].str.startswith('1')) | (df_it['Gudang #Terima'].str.startswith('9')))
       & (df_it['Nama Barang']==barang)][['Nomor #Terima','Gudang #Terima','Tanggal #Terima','#Sat. Terkecil','#Qty. Terkecil']], use_container_width=True, hide_index=True)
