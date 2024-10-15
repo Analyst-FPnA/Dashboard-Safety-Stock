@@ -281,7 +281,7 @@ df_kirim = df_kirim[(df_kirim['Gudang #Terima'].str.contains('|'.join(df_cab[(df
 df_saldo = df_saldo.merge(df_kirim.groupby('Nama Barang')[['Keluar']].sum().reset_index().rename(columns={'Keluar':f'Pickup Resto {bulan}'}),how='left')
 
 with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
-    with z.open(f'4201_{bulan}.xlsx') as f:
+    with z.open(f'4201_{bulan[:-5]}.xlsx') as f:
         df_4201 = pd.read_excel(f,header=4).loc[1:,['Nama Barang','Total Nama Gudang']]
 
 
