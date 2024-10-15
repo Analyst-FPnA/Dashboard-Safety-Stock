@@ -272,6 +272,7 @@ df_saldo = df_saldo.groupby('Nama Barang')[['Masuk']].sum().reset_index().merge(
 df_saldo[f'SO Awal Bulan {bulan}'] =  (df_saldo['Masuk'] - df_saldo['Keluar']).astype('int')
 df_saldo[f'SO Awal Bulan {bulan}'] = df_saldo[f'SO Awal Bulan {bulan}'].astype('int')
 df_tab = df[(df['Bulan'] == bulan) & ((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+st.dataframe(df_tab)
 df_saldo = df_saldo.merge(df_tab[df_tab['Deskripsi'].str.contains('Penerimaan')].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian {bulan}'}), how='left')
 df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
 df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
@@ -328,7 +329,7 @@ st.dataframe(df_saldo.rename(columns={'Keluar':f'Avg Pickup Resto'}).iloc[:,[0,1
 barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), index=0, on_change=reset_button_state)
 #barang = df_saldo['Nama Barang'].values[0]
 
-df_it['Bulan'] = pd.to_datetime(df_it['Tanggal #Terima'], format='%d %b %Y').dt.month_name()
+df_it['Bulan'] = pd.to_datetime(df_it['Tanggal #Terima'], format='%d %b %Y').strftime('%B')
 st.dataframe(df_it[(df_it['Bulan']==bulan)&((df_it['Gudang #Kirim'].str.startswith('2')) | (df_it['Gudang #Kirim'].str.startswith('5')))
       & ((df_it['Gudang #Terima'].str.startswith('1')) | (df_it['Gudang #Terima'].str.startswith('9')))
       & (df_it['Nama Barang']==barang)][['Nomor #Terima','Gudang #Terima','Tanggal #Terima','#Sat. Terkecil','#Qty. Terkecil']], use_container_width=True, hide_index=True)
