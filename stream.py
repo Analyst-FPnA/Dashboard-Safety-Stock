@@ -139,22 +139,8 @@ dest_path = f'downloaded_file.zip'
 download_file_from_google_drive(file_id, dest_path)
 if not os.path.exists('all_4208.csv'):
     with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
-          df_4208 = []
-          df_4205 = []
           df_9901 = []
           for file in z.namelist():
-            if file.startswith('42.08'):  
-              # Loop untuk membaca setiap file di dalam ZIP
-                  with z.open(file) as f:
-                      # Membaca setiap file Excel ke dalam DataFrame
-                      df = pd.read_excel(f)
-                      df_4208.append(df)
-            if file.startswith('42.05'):  
-              # Loop untuk membaca setiap file di dalam ZIP
-                  with z.open(file) as f:
-                      # Membaca setiap file Excel ke dalam DataFrame
-                      df = pd.read_excel(f)
-                      df_4205.append(df)
             if file.startswith('99.01'):  
               # Loop untuk membaca setiap file di dalam ZIP
                   with z.open(file) as f:
@@ -163,8 +149,6 @@ if not os.path.exists('all_4208.csv'):
                       df_9901.append(df)
                     
           # Menggabungkan semua DataFrame
-          pd.concat(df_4208, ignore_index=True).to_csv('all_4208.csv',index=False)
-          pd.concat(df_4205, ignore_index=True).to_csv('all_4205.csv',index=False)
           pd.concat(df_9901, ignore_index=True).to_csv('all_9901.csv',index=False)
         
 if 'df_cab' not in locals():
@@ -173,9 +157,18 @@ if 'df_cab' not in locals():
         df_cab = pd.read_csv(f)
     with z.open('Stocklevel.xlsx') as f:
         df_level = pd.read_excel(f)
+    for file in z.namelist():
+        if file.startswith('42.08'):  
+            with z.open(file) as f:
+              # Membaca setiap file Excel ke dalam DataFrame
+              df = pd.read_csv(f)
+        if file.startswith('42.05'):  
+            with z.open(file) as f:
+              # Membaca setiap file Excel ke dalam DataFrame
+              df_it = pd.read_csv(f)
 
-df = pd.read_csv('all_4208.csv')
-df_it = pd.read_csv('all_4205.csv')
+#df = pd.read_csv('all_4208.csv')
+#df_it = pd.read_csv('all_4205.csv')
 df['Cabang'] = df['Cabang'].replace({'System)':'Transit (AOL System)'})
 df['Cabang'] = df['Cabang'].str.extract(r'\(([^()]*)\)[^()]*$')
 df = df.merge(df_cab[['Cabang','Nama Cabang']],how='left')
