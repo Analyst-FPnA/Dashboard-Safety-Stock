@@ -220,7 +220,7 @@ for b in ['January 2024','February 2024','March 2024','April 2024','May 2024','J
     df_std = df_std[df_std['Keluar']>0]
     df_std = df_std.groupby(['Nama Barang'])[['Keluar']].mean().astype('int').reset_index()
     markup=0.1
-    df_std['Keluar'] = ((round(df_std['Keluar'].fillna(0)*markup)*3)+df_std['Keluar'].fillna(0))#.astype(int)
+    df_std['Keluar'] = ((round(df_std['Keluar'].fillna(0)*markup))+df_std['Keluar'].fillna(0))*3#.astype(int)
     df_std['Month'] = b
     df_std = df_std.merge(df_4201[['Kode Barang','Nama Barang']].drop_duplicates(),how='left')
     df_std['Kode Barang'] = df_std['Kode Barang'].astype('int').astype('str')
@@ -303,7 +303,7 @@ df_saldo = df_level.merge(df_saldo,how='left').merge(df_std,how='left')
 df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}']
 def indikator(row):
     if row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}']!=np.nan:
-        markup = (np.round(row['Keluar']*(10/100))*3)+row['Keluar']
+        markup = (np.round(row['Keluar']*(10/100))+row['Keluar'])*3
         bm = markup + np.round(markup*(5/100))
         ba = markup - np.round(markup*(5/100))
         if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] >= bm) & (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] <= ba):
