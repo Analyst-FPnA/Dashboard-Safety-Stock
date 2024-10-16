@@ -219,7 +219,8 @@ for b in ['January 2024','February 2024','March 2024','April 2024','May 2024','J
     df_std = df_std.groupby(['Nama Barang','Bulan'])[['Keluar']].sum().reset_index()
     df_std = df_std[df_std['Keluar']>0]
     df_std = df_std.groupby(['Nama Barang'])[['Keluar']].mean().astype('int').reset_index()
-    df_std['Keluar'] = (round(df_std['Keluar'].fillna(0)*0.1)+df_std['Keluar'].fillna(0))#.astype(int)
+    markup=3
+    df_std['Keluar'] = (round(df_std['Keluar'].fillna(0)*markup)+df_std['Keluar'].fillna(0))#.astype(int)
     df_std['Month'] = b
     df_std = df_std.merge(df_4201[['Kode Barang','Nama Barang']].drop_duplicates(),how='left')
     df_std['Kode Barang'] = df_std['Kode Barang'].astype('int').astype('str')
