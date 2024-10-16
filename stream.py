@@ -303,7 +303,7 @@ df_saldo = df_level.merge(df_saldo,how='left').merge(df_std,how='left')
 df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}']
 def indikator(row):
     if row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}']!=np.nan:
-        markup = (np.round(row['Keluar']*(10/100))*3)+row['Keluar'])
+        markup = (np.round(row['Keluar']*(10/100))*3)+row['Keluar']
         bm = markup + np.round(markup*(5/100))
         ba = markup - np.round(markup*(5/100))
         if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] >= bm) & (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] <= ba):
