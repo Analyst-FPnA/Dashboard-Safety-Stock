@@ -275,7 +275,7 @@ df_std = df_std.groupby(['Nama Barang','Bulan'])[['Keluar']].sum().reset_index()
 df_std = df_std[df_std['Keluar']>0]
 df_std = df_std.groupby('Nama Barang')[['Keluar']].mean().astype('int').reset_index()
 
-df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{bulan}',format='%B %Y')) & ((df['Nama Cabang'].str.startswith('H00')) |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
+df_saldo = df[((df['Tanggal']<pd.to_datetime(f'{bulan}',format='%B %Y')) | df['Deskripsi'].str.contains('Saldo')) & ((df['Nama Cabang'].str.startswith('H00')) |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
 df_saldo = df_saldo.groupby('Nama Barang')[['Masuk']].sum().reset_index().merge(df_saldo.groupby('Nama Barang')[['Keluar']].sum().reset_index(),how='outer')
 df_saldo[f'SO Awal Bulan {bulan}'] =  (df_saldo['Masuk'] - df_saldo['Keluar']).astype('int')
 df_saldo[f'SO Awal Bulan {bulan}'] = df_saldo[f'SO Awal Bulan {bulan}'].astype('int')
