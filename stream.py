@@ -224,7 +224,7 @@ for b in ['January 2024','February 2024','March 2024','April 2024','May 2024','J
     df_std['Month'] = b
     df_std = df_std.merge(df_4201[['Kode Barang','Nama Barang']].drop_duplicates(),how='left')
     df_std['Kode Barang'] = df_std['Kode Barang'].astype('int').astype('str')
-    data = df_9901[df_9901['Tanggal']<pd.to_datetime(b,format='%B %Y')].sort_values(['Tanggal','Kode #','#Purch.@Price'],ascending=False).drop_duplicates(subset=['Kode #'])
+    data = df_9901[df_9901['Tanggal']<(pd.to_datetime(b,format='%B %Y')+pd.DateOffset(months=1))].sort_values(['Tanggal','Kode #','#Purch.@Price'],ascending=False).drop_duplicates(subset=['Kode #'])
     data['Kode #'] = data['Kode #'].astype('int').astype('str')
     df_std = df_std.merge(data[['Kode #','#Purch.@Price']],how='left',left_on=['Kode Barang'],right_on=['Kode #'])
     dfs.append(df_std)
