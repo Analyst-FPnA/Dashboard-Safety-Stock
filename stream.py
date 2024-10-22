@@ -291,7 +291,7 @@ with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
     with z.open(f'4201_{bulan[:-5]}.xlsx') as f:
         df_4201 = pd.read_excel(f,header=4).loc[1:,['Nama Barang','Total Nama Gudang']]
 
-
+df_4201['Nama Barang'] = df_4201['Nama Barang'].str.replace('TEMPAT SAMPAH 80L (THAWING ADONAN)','BAK THAWING BULAT 80 L')
 df_saldo = df_saldo.fillna(0)
 df_saldo[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] = (df_saldo[f'SO Awal Bulan {bulan}'] + df_saldo[f'Pembelian {bulan}'] - df_saldo[f'Pickup Resto {bulan}']).astype(int)
 df_saldo = df_saldo.drop(columns=['Masuk','Keluar'])
