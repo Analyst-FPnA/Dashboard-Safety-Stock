@@ -249,8 +249,8 @@ df_over['#Purch.@Price'] = df_over['#Purch.@Price'].bfill()
 df_over = df_over[df_over['Kuantitas']>0]
 df_over['Nominal'] = df_over['Kuantitas']*df_over['#Purch.@Price']
 agg =st.selectbox("KUANTITAS/NOMINAL:", ['Kuantitas','Nominal'], index=0, on_change=reset_button_state)
-df['Tanggal']=pd.to_datetime(df['Tanggal'])
 df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=df.sort_values('Tanggal')['Bulan'].unique().tolist())
+df_over = df_over.sort_values('Bulan')
 df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values=agg).reset_index()
 
 if agg=='Kuantitas':
