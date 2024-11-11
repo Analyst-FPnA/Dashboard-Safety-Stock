@@ -188,7 +188,7 @@ df_9901 = pd.read_csv('all_9901.csv')
 df_9901['Tanggal']  = pd.to_datetime(df_9901['Tanggal'])
 df_9901['#Purch.@Price'] = df_9901['#Purch.@Price'].astype(float)
 dfs = []
-for b in ['January 2024','February 2024','March 2024','April 2024','May 2024','June 2024','July 2024','August 2024','September 2024']:
+for b in ['January 2024','February 2024','March 2024','April 2024','May 2024','June 2024','July 2024','August 2024','September 2024','October 2024']:
         df_saldo = df[(df['Tanggal']<pd.to_datetime(f'{b}',format='%B %Y'))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
         df_saldo = df_saldo.groupby(['Nama Barang'])[['Masuk']].sum().reset_index().merge(df_saldo.groupby(['Nama Barang'])[['Keluar']].sum().reset_index(),how='outer')
         df_saldo['Saldo Awal'] =  df_saldo['Masuk'] - df_saldo['Keluar']
@@ -210,7 +210,7 @@ for b in ['January 2024','February 2024','March 2024','April 2024','May 2024','J
 df_over = pd.concat(dfs,ignore_index=True)
 
 dfs=[]
-for b in ['January 2024','February 2024','March 2024','April 2024','May 2024','June 2024','July 2024','August 2024','September 2024']:
+for b in ['January 2024','February 2024','March 2024','April 2024','May 2024','June 2024','July 2024','August 2024','September 2024','October 2024']:
     df_tab = df[(df['Tanggal']>=pd.to_datetime(f'{b}',format='%B %Y')-pd.DateOffset(months=6)) & (df['Tanggal']<pd.to_datetime(f'{b}',format='%B %Y')) & ((df['Cabang']=='IT') |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
     df_saldo = df_saldo.merge(df_tab[(df_tab['Nomor #'].str.contains('RI.')) | (df_tab['Nomor #'].str.contains('PI.'))].groupby('Nama Barang')[['Masuk']].sum().reset_index(), how='left')
     df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
