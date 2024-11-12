@@ -304,13 +304,13 @@ df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {
 def indikator(row):
     if row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}']!=np.nan:
         markup = (np.round(row['Keluar']*(10/100))+row['Keluar'])*3
-        bm = markup + np.round(markup*(5/100))
-        ba = markup - np.round(markup*(5/100))
-        if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] >= bm) & (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] <= ba):
+        ba = markup + np.round(markup*(5/100))
+        bb = markup - np.round(markup*(5/100))
+        if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] >= bb) & (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] <= ba):
             return 'Hijau'
         if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] > ba):
             return 'Merah'
-        if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] < bm):
+        if (row[f'SO Awal Bulan {(pd.to_datetime(f'{bulan}',format='%B %Y')+pd.DateOffset(months=1)).strftime('%B %Y')}'] < bb):
             return 'Kuning'
         
 df_saldo['Indikator'] = df_saldo.apply(lambda row: indikator(row), axis=1)
