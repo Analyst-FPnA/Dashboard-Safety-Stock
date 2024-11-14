@@ -223,11 +223,12 @@ fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG'
 st.plotly_chart(fig, use_container_width=True)
 
 quarter = st.selectbox("QUARTER:", ['Q1','Q2','Q3','Q4'], index=0, on_change=reset_button_state)
-if 'Q1' in quarter:
+st.write(quarter[0])
+if 'Q1' == quarter:
     bulan = ['January','February','March']
-if 'Q2' in quarter:
+if 'Q2' == quarter:
     bulan = ['April','May','June']
-if 'Q3' in quarter:
+if 'Q3' == quarter:
     bulan = ['July','August','September']
 else:
     bulan = ['October','November','December']
