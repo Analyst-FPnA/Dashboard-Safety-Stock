@@ -169,7 +169,7 @@ def highlight_indikator(val):
 
 
 
-def create_dual_axis_chart(data, x_column, y_bar_column, y_line_column):
+def create_dual_axis_chart(data, x_column, y_bar_column, y_line_column, title):
     fig = go.Figure()
 
     # Menambahkan bar chart
@@ -197,7 +197,7 @@ def create_dual_axis_chart(data, x_column, y_bar_column, y_line_column):
 
     # Menyesuaikan layout untuk dua sumbu y
     fig.update_layout(
-        title=f"Overstock",
+        title=title,
         xaxis=dict(title=x_column),
         yaxis=dict(
             title=y_bar_column,
@@ -219,7 +219,7 @@ def create_dual_axis_chart(data, x_column, y_bar_column, y_line_column):
 
 df_line = df_quarter[df_quarter['INDIKATOR']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
 # Menampilkan grafik
-fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG')
+fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG','OVERSTOCK (QUARTER)')
 st.plotly_chart(fig, use_container_width=True)
 
 quarter = st.selectbox("QUARTER:", ['Q1','Q2','Q3','Q4'], index=0, on_change=reset_button_state)
@@ -247,5 +247,5 @@ st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').
 
 df_line2 = df_month[df_month['INDIKATOR']=='OVER'].groupby('Month').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
 
-fig = create_dual_axis_chart(df_line2, 'Month', 'TOTAL NOMINAL', 'TOTAL BARANG')
+fig = create_dual_axis_chart(df_line2, 'Month', 'TOTAL NOMINAL', 'TOTAL BARANG', 'OVERSTOCK (MONTH))
 st.plotly_chart(fig, use_container_width=True)
