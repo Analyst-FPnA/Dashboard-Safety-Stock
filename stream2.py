@@ -189,4 +189,4 @@ df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Bar
     ], axis=1)
 
 
-st.dataframe(df_3m.style.format(lambda x: format_number(x)), use_container_width=True, hide_index=True)
+st.dataframe(df_3m, use_container_width=True, hide_index=True)
