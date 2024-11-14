@@ -147,15 +147,6 @@ list_bulan = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December']
 
-quarter = st.selectbox("QUARTER:", ['Q1','Q2','Q3','Q4'], index=0, on_change=reset_button_state)
-if quarter =='Q1':
-    bulan = ['January','February','March']
-if quarter =='Q2':
-    bulan = ['April','May','June']
-if quarter =='Q3':
-    bulan = ['July','August','September']
-else:
-    bulan = ['October','November','December']
 
 def format_number(x):
     if x==0:
@@ -176,16 +167,7 @@ def highlight_indikator(val):
     return color
     
 
-df_month['Month'] = pd.Categorical(df_month['Month'],categories=pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
-df_month = df_month.sort_values(['Month','Nama Barang'])
 
-df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
-    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PICK UP']],how='left'),
-    df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PEMBELIAN').reset_index().merge(
-    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PEMBELIAN','HARGA PEMBELIAN TERAKHIR','TOTAL']],how='left').drop(columns='Nama Barang'),
-    df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG SALDO AKHIR').reset_index().merge(
-    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG SALDO AKHIR']],how='left').drop(columns='Nama Barang'),
-    ], axis=1)
 
 def create_dual_axis_chart(data, x_column, y_bar_column, y_line_column):
     fig = go.Figure()
@@ -239,6 +221,27 @@ df_line = df_quarter[df_quarter['INDIKATOR']=='OVER'].groupby('Quarter').agg({'N
 # Menampilkan grafik
 fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG')
 st.plotly_chart(fig, use_container_width=True)
+
+quarter = st.selectbox("QUARTER:", ['Q1','Q2','Q3','Q4'], index=0, on_change=reset_button_state)
+if quarter =='Q1':
+    bulan = ['January','February','March']
+if quarter =='Q2':
+    bulan = ['April','May','June']
+if quarter =='Q3':
+    bulan = ['July','August','September']
+else:
+    bulan = ['October','November','December']
+
+df_month['Month'] = pd.Categorical(df_month['Month'],categories=pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
+df_month = df_month.sort_values(['Month','Nama Barang'])
+
+df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
+    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PICK UP']],how='left'),
+    df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PEMBELIAN').reset_index().merge(
+    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PEMBELIAN','HARGA PEMBELIAN TERAKHIR','TOTAL']],how='left').drop(columns='Nama Barang'),
+    df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG SALDO AKHIR').reset_index().merge(
+    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG SALDO AKHIR']],how='left').drop(columns='Nama Barang'),
+    ], axis=1)
 
 st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
 
