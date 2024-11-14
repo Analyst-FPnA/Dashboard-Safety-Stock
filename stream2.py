@@ -189,4 +189,7 @@ df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Bar
     ], axis=1)
 
 
+df_3m.columns = pd.io.parsers.ParserBase({'names': df_3m.columns})._maybe_dedup_names(df.columns)
+
+# Menampilkan DataFrame di Streamlit
 st.write(df_3m)
