@@ -209,7 +209,7 @@ def create_dual_axis_chart(data, x_column, y_bar_column, y_line_column):
             y=data[y_line_column],
             name=y_line_column,
             mode='lines+markers',
-            line=dict(color='blue'),
+            line=dict(color='blue', width=4),
             yaxis='y2'
         )
     )
