@@ -247,6 +247,7 @@ df_3m.columns = [col.replace('_x', ' ') if col.endswith('_x') else col for col i
 df_3m.columns = [col.replace('_y', '  ') if col.endswith('_y') else col for col in df_3m.columns]
 
 st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
+st.write('')
 st.dataframe(df_3m.style.format(lambda x: format_number(x)), use_container_width=True, hide_index=True)
 
 df_line2 = df_month[df_month['INDIKATOR']=='OVER'].groupby('Month').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
