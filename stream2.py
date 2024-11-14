@@ -197,7 +197,7 @@ def create_dual_axis_chart(data, x_column, y_bar_column, y_line_column):
 
     # Menyesuaikan layout untuk dua sumbu y
     fig.update_layout(
-        title=f"{y_bar_column} dan {y_line_column} per {x_column}",
+        title=f"",
         xaxis=dict(title=x_column),
         yaxis=dict(
             title=y_bar_column,
