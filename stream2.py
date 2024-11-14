@@ -189,4 +189,4 @@ df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Bar
     ], axis=1)
 
 
-st.dataframe(df_3m)
+st.write(df_3m)
