@@ -188,6 +188,6 @@ df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Bar
     df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG SALDO AKHIR']],how='left').drop(columns='Nama Barang'),
     ], axis=1)
 
-df_3m = df_3m.merge(df_quarter[['Nama Barang','Angka Standart','Indikator']],how='left')
+df_3m = df_3m.merge(df_quarter[['Nama Barang','Angka Standart','INDIKATOR']],how='left')
 
 st.dataframe(df_3m.style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
