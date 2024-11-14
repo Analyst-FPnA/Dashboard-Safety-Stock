@@ -230,7 +230,7 @@ if 'Q2' == quarter:
     bulan = ['April','May','June']
 if 'Q3' == quarter:
     bulan = ['July','August','September']
-else:
+if 'Q4' == quarter:
     bulan = ['October','November','December']
 
 df_month['Month'] = pd.Categorical(df_month['Month'],categories=list_bulan)#pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
