@@ -247,5 +247,5 @@ st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').
 
 df_line2 = df_month[df_month['INDIKATOR']=='OVER'].groupby('Month').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
 
-fig = create_dual_axis_chart(df_line2, 'Month', 'TOTAL NOMINAL', 'TOTAL BARANG', 'OVERSTOCK (MONTH))
+fig = create_dual_axis_chart(df_line2, 'Month', 'TOTAL NOMINAL', 'TOTAL BARANG', 'OVERSTOCK (MONTH)')
 st.plotly_chart(fig, use_container_width=True)
