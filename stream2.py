@@ -132,74 +132,30 @@ def download_file_from_google_drive(file_id, dest_path):
         url = f"https://drive.google.com/uc?id={file_id}"
         gdown.download(url, dest_path, quiet=False)
 
-        
-file_id = '1kFrECcZmJ1SgvexIvcMY_tsg45nDxobH'
+file_id = '1LM2YWeFHBxER3fqR0cY_OuP8x5FnZyeu'
 dest_path = f'downloaded_file.zip'
 download_file_from_google_drive(file_id, dest_path)
-if not os.path.exists('all_4208.csv'):
-    with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
-          df_4208 = []
-          df_4205 = []
-          for file in z.namelist():
-            if file.startswith('42.08'):  
-              # Loop untuk membaca setiap file di dalam ZIP
-                  with z.open(file) as f:
-                      # Membaca setiap file Excel ke dalam DataFrame
-                      df = pd.read_excel(f)
-                      df_4208.append(df)
-            if file.startswith('42.05'):  
-              # Loop untuk membaca setiap file di dalam ZIP
-                  with z.open(file) as f:
-                      # Membaca setiap file Excel ke dalam DataFrame
-                      df = pd.read_excel(f)
-                      df_4205.append(df)
-                    
-          # Menggabungkan semua DataFrame
-          pd.concat(df_4208, ignore_index=True).to_csv('all_4208.csv',index=False)
-          pd.concat(df_4205, ignore_index=True).to_csv('all_4205.csv',index=False)
         
 if 'df_cab' not in locals():
   with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
-    with z.open('daftar_gudang.csv') as f:
-        df_cab = pd.read_csv(f)
-    with z.open('Stocklevel.xlsx') as f:
-        df_level = pd.read_excel(f)
-
-df = pd.read_csv('all_4208.csv')
-df_it = pd.read_csv('all_4205.csv')
-df['Cabang'] = df['Cabang'].replace({'System)':'Transit (AOL System)'})
-df['Cabang'] = df['Cabang'].str.extract(r'\(([^()]*)\)[^()]*$')
-df = df.merge(df_cab[['Cabang','Nama Cabang']],how='left')
-df['Bulan'] = pd.to_datetime(df['Tanggal'],format='%d/%m/%Y',errors='raise').dt.month_name()
+    with z.open('month.csv') as f:
+        df_month = pd.read_csv(f)
+    with z.open('quarter.csv') as f:
+        df_quarter = pd.read_csv(f)
 
 list_bulan = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December']
 
-df['Bulan'] = df['Bulan'].bfill()
-dfs = []
-for b in df['Bulan'].unique():
-    if b=='January':
-        df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(b)+1:]))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
-        df_saldo = df_saldo[df_saldo['Deskripsi'].str.contains('Saldo')].groupby(['Nama Barang'])[['Masuk']].sum().reset_index().rename(columns={'Masuk':'Saldo Akhir'})
-        df_saldo['Bulan'] = b
-        dfs.append(df_saldo[['Bulan','Nama Barang','Saldo Akhir']])
-    else:
-        df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(b)+1:]))&((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
-        df_saldo = df_saldo.groupby(['Nama Barang'])[['Masuk']].sum().reset_index().merge(df_saldo.groupby(['Nama Barang'])[['Keluar']].sum().reset_index(),how='outer')
-        df_saldo['Saldo Akhir'] =  df_saldo['Masuk'] - df_saldo['Keluar']
-        df_saldo['Bulan'] = b
-        dfs.append(df_saldo[['Bulan','Nama Barang','Saldo Akhir']])
-
-
-df_over = pd.concat(dfs,ignore_index=True)
-df_over = df_over.merge(df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standard'})[['Nama Barang','Angka Standard']],
-              how='left')
-df_over['Overstock'] = df_over['Saldo Akhir'] - df_over['Angka Standard']
-df_over = df_over[df_over['Overstock']>0]
-df_over['Bulan'] = pd.Categorical(df_over['Bulan'],categories=list_bulan)
-df_over = df_over.sort_values('Bulan')
-df_over = df_over.pivot(index='Nama Barang',columns='Bulan',values='Overstock').reset_index().fillna(0)
+quarter = st.selectbox("QUARTER:", ['Q1','Q2','Q3','Q4'], index=0, on_change=reset_button_state)
+if quarter =='Q1':
+    bulan = ['January','February','March']
+if quarter =='Q2':
+    bulan = ['April','May','June']
+if quarter =='Q3':
+    bulan = ['July','August','September']
+else:
+    bulan = ['October','November','December']
 
 def format_number(x):
     if x==0:
@@ -207,64 +163,28 @@ def format_number(x):
     if isinstance(x, (int, float)):
         return "{:,.0f}".format(x)
     return x
-    
-df_over = df_over.style.format(lambda x: format_number(x)).background_gradient(cmap='Reds', axis=1, subset=df_over.columns[1:])
-st.dataframe(df_over, use_container_width=True, hide_index=True)
 
-bulan =st.selectbox("BULAN:", list_bulan, index=7, on_change=reset_button_state)
-
-df_saldo = df[~(df['Bulan'].isin(list_bulan[list_bulan.index(bulan):])) & ((df['Nama Cabang'].str.startswith('H00')) |(df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
-df_saldo = df_saldo.groupby('Nama Barang')[['Masuk']].sum().reset_index().merge(df_saldo.groupby('Nama Barang')[['Keluar']].sum().reset_index(),how='outer')
-df_saldo[f'SO Awal Bulan {bulan}'] =  df_saldo['Masuk'] - df_saldo['Keluar']
-
-df_tab = df[(df['Bulan'] == bulan) & ((df['Nama Cabang'].str.startswith('H00')) | (df['Nama Cabang'].str.startswith('2')) | (df['Nama Cabang'].str.startswith('5')))]
-df_saldo = df_saldo.merge(df_tab[df_tab['Deskripsi'].str.contains('Penerimaan')].groupby('Nama Barang')[['Masuk']].sum().reset_index().rename(columns={'Masuk':f'Pembelian {bulan}'}), how='left')
-df_kirim = df_tab[(df_tab['Keluar']!=0) & (df_tab['Nomor #'].str.contains('IT'))]
-df_kirim = df_kirim.merge(df_it.drop_duplicates(subset=['Nomor #Kirim','Nama Barang']), how='left',left_on=['Nomor #','Nama Barang'], right_on=['Nomor #Kirim','Nama Barang'])
-#st.dataframe(df_kirim)
-df_kirim = df_kirim[(df_kirim['Gudang #Terima'].str.contains('|'.join(df_cab[(df_cab['Nama Cabang'].str.startswith('1')) | (df_cab['Nama Cabang'].str.startswith('9'))]['Cabang']),case=False))]
-
-df_saldo = df_saldo.merge(df_kirim.groupby('Nama Barang')[['Keluar']].sum().reset_index().rename(columns={'Keluar':f'Pickup Resto {bulan}'}),how='left')
-
-with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
-    with z.open(f'4201_{bulan}.xlsx') as f:
-        df_4201 = pd.read_excel(f,header=4).loc[1:,['Nama Barang','Total Nama Gudang']]
-
-
-df_saldo = df_saldo.fillna(0)
-df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] = (df_saldo[f'SO Awal Bulan {bulan}'] + df_saldo[f'Pembelian {bulan}'] - df_saldo[f'Pickup Resto {bulan}']).astype(int)
-df_saldo = df_saldo.drop(columns=['Masuk','Keluar'])
-df_saldo.iloc[:,1:] = df_saldo.iloc[:,1:].astype(int)
-df_saldo = df_saldo.merge(df_4201, how='left').rename(columns={'Total Nama Gudang':f'SO 42.01 {bulan}'})
-df_level = df_level.rename(columns={'Nama Barang Barang & Jasa':'Nama Barang','Level Stock':'Angka Standard'})[['Nama Barang','Angka Standard']]
-df_saldo = df_level.merge(df_saldo,how='left')
-df_saldo['Control'] = df_saldo[f'SO 42.01 {bulan}'] - df_saldo[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}']
-def indikator(row):
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standard']) & (row[f'Pembelian {bulan}']<=0):
-        return 'Hijau'
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] > row['Angka Standard']) & (row[f'Pembelian {bulan}']>0):
-        return 'Merah'
-    if (row[f'SO Awal Bulan {list_bulan[list_bulan.index(bulan)+1]}'] <= row['Angka Standard']):
-        return 'Kuning'
-df_saldo['Indikator'] = df_saldo.apply(lambda row: indikator(row), axis=1)
 def highlight_indikator(val):
-    if val == 'Hijau':
+    if val == 'OK':
         color = 'background-color: green; color: green;'
-    elif val == 'Merah':
+    elif val == 'OVER':
         color = 'background-color: red; color: red;'
-    elif val == 'Kuning':
+    elif val == 'LOWER':
         color = 'background-color: yellow; color: yellow;'
     else:
         color = ''
     return color
-df_saldo[f'Pembelian {bulan}'] = df_saldo[f'Pembelian {bulan}'].astype(int)   
-df_saldo[f'Pickup Resto {bulan}'] = df_saldo[f'Pickup Resto {bulan}'].astype(int)
-st.dataframe(df_saldo.style.applymap(highlight_indikator, subset=['Indikator']), use_container_width=True, hide_index=True)
+    
+st.dataframe(df_quarter.style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
 
-barang = st.selectbox("NAMA BARANG:", df_level['Nama Barang'].values.tolist(), index=0, on_change=reset_button_state)
-#barang = df_saldo['Nama Barang'].values[0]
+df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
+    df_quarter[df_quarter['Quarter']==qr][['Nama Barang','AVG PICK UP']],how='left'),
+    df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PEMBELIAN').reset_index().merge(
+    df_quarter[df_quarter['Quarter']==qr][['Nama Barang','AVG PEMBELIAN','HARGA PEMBELIAN TERAKHIR','TOTAL']],how='left').drop(columns='Nama Barang'),
+    df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG SALDO AKHIR').reset_index().merge(
+    df_quarter[df_quarter['Quarter']==qr][['Nama Barang','AVG SALDO AKHIR']],how='left').drop(columns='Nama Barang'),
+    ], axis=1)
 
-df_it['Bulan'] = pd.to_datetime(df_it['Tanggal #Terima'], format='%d %b %Y').dt.month_name()
-st.dataframe(df_it[(df_it['Bulan']==bulan)&((df_it['Gudang #Kirim'].str.startswith('2')) | (df_it['Gudang #Kirim'].str.startswith('5')))
-      & ((df_it['Gudang #Terima'].str.startswith('1')) | (df_it['Gudang #Terima'].str.startswith('9')))
-      & (df_it['Nama Barang']==barang)][['Nomor #Terima','Gudang #Terima','Tanggal #Terima','#Sat. Terkecil','#Qty. Terkecil']], use_container_width=True, hide_index=True)
+df_3m.merge(df_quarter[['Nama Barang','Angka Standart','Indikator']],how='left')
+
+st.dataframe(df_3m.style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
