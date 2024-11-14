@@ -245,3 +245,7 @@ df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Bar
 
 st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
 
+df_line2 = df_month[df_month['INDIKATOR']=='OVER'].groupby('Month').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
+
+fig = create_dual_axis_chart(df_line2, 'Month', 'TOTAL NOMINAL', 'TOTAL BARANG')
+st.plotly_chart(fig, use_container_width=True)
