@@ -235,15 +235,18 @@ else:
 df_month['Month'] = pd.Categorical(df_month['Month'],categories=pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
 df_month = df_month.sort_values(['Month','Nama Barang'])
 
-df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
-    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PICK UP']],how='left'),
-    df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PEMBELIAN').reset_index().merge(
-    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PEMBELIAN','HARGA PEMBELIAN TERAKHIR','TOTAL']],how='left').drop(columns='Nama Barang'),
-    df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG SALDO AKHIR').reset_index().merge(
-    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG SALDO AKHIR']],how='left').drop(columns='Nama Barang'),
-    ], axis=1)
+df_3m = df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
+    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PICK UP']],how='left').merge(
+        df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PEMBELIAN').reset_index().merge(
+            df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PEMBELIAN','HARGA PEMBELIAN TERAKHIR','TOTAL']],how='left'), 
+            how='left', on='Nama Barang').merge(df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG SALDO AKHIR').reset_index().merge(
+    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG SALDO AKHIR']],how='left'), how='left')
+
+df_3m.columns = [col.replace('_x', ' ') if col.endswith('_x') else col for col in df_3m.columns]
+df_3m.columns = [col.replace('_y', '  ') if col.endswith('_y') else col for col in df_3m.columns]
 
 st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
+st.dataframe(df_3m.style.format(lambda x: format_number(x)), use_container_width=True, hide_index=True)
 
 df_line2 = df_month[df_month['INDIKATOR']=='OVER'].groupby('Month').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
 
