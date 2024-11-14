@@ -138,9 +138,9 @@ download_file_from_google_drive(file_id, dest_path)
         
 if 'df_cab' not in locals():
   with zipfile.ZipFile(f'downloaded_file.zip', 'r') as z:
-    with z.open('month.csv') as f:
+    with z.open('df_month.csv') as f:
         df_month = pd.read_csv(f)
-    with z.open('quarter.csv') as f:
+    with z.open('df_quarter.csv') as f:
         df_quarter = pd.read_csv(f)
 
 list_bulan = [
