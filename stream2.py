@@ -187,3 +187,56 @@ df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Bar
     df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG SALDO AKHIR').reset_index().merge(
     df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG SALDO AKHIR']],how='left').drop(columns='Nama Barang'),
     ], axis=1)
+
+def create_dual_axis_chart(data, x_column, y_bar_column, y_line_column):
+    fig = go.Figure()
+
+    # Menambahkan bar chart
+    fig.add_trace(
+        go.Bar(
+            x=data[x_column],
+            y=data[y_bar_column],
+            name=y_bar_column,
+            marker_color='blue',
+            yaxis='y1'
+        )
+    )
+
+    # Menambahkan line chart
+    fig.add_trace(
+        go.Scatter(
+            x=data[x_column],
+            y=data[y_line_column],
+            name=y_line_column,
+            mode='lines+markers',
+            line=dict(color='orange'),
+            yaxis='y2'
+        )
+    )
+
+    # Menyesuaikan layout untuk dua sumbu y
+    fig.update_layout(
+        title=f"{y_bar_column} dan {y_line_column} per {x_column}",
+        xaxis=dict(title=x_column),
+        yaxis=dict(
+            title=y_bar_column,
+            titlefont=dict(color="blue"),
+            tickfont=dict(color="blue")
+        ),
+        yaxis2=dict(
+            title=y_line_column,
+            titlefont=dict(color="orange"),
+            tickfont=dict(color="orange"),
+            overlaying='y',
+            side='right'
+        ),
+        legend=dict(x=0.1, y=1.1, orientation='h'),
+        template="plotly_white"
+    )
+
+    return fig
+
+df_line = df_quarter[df_quarter['INDIKATOR']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
+# Menampilkan grafik
+fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL BARANG', 'TOTAL NOMINAL')
+fig.show()
