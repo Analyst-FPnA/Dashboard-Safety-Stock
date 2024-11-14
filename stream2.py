@@ -169,7 +169,7 @@ def highlight_indikator(val):
         color = 'background-color: green; color: green;'
     elif val == 'OVER':
         color = 'background-color: red; color: red;'
-    elif val == 'LOWER':
+    elif val == 'LOW':
         color = 'background-color: yellow; color: yellow;'
     else:
         color = ''
