@@ -175,17 +175,17 @@ def highlight_indikator(val):
         color = ''
     return color
     
-st.dataframe(df_quarter.style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
+st.dataframe(df_quarter[df_quarter['Quarter']==quarter].style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
 
 df_month['Month'] = pd.Categorical(df_month['Month'],categories=pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
 df_month = df_month.sort_values(['Month','Nama Barang'])
 
 df_3m = pd.concat([df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
-    df_quarter[df_quarter['Quarter']==qr][['Nama Barang','AVG PICK UP']],how='left'),
+    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PICK UP']],how='left'),
     df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PEMBELIAN').reset_index().merge(
-    df_quarter[df_quarter['Quarter']==qr][['Nama Barang','AVG PEMBELIAN','HARGA PEMBELIAN TERAKHIR','TOTAL']],how='left').drop(columns='Nama Barang'),
+    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PEMBELIAN','HARGA PEMBELIAN TERAKHIR','TOTAL']],how='left').drop(columns='Nama Barang'),
     df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG SALDO AKHIR').reset_index().merge(
-    df_quarter[df_quarter['Quarter']==qr][['Nama Barang','AVG SALDO AKHIR']],how='left').drop(columns='Nama Barang'),
+    df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG SALDO AKHIR']],how='left').drop(columns='Nama Barang'),
     ], axis=1)
 
 df_3m = df_3m.merge(df_quarter[['Nama Barang','Angka Standart','Indikator']],how='left')
