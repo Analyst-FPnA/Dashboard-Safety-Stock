@@ -223,16 +223,16 @@ fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG'
 st.plotly_chart(fig, use_container_width=True)
 
 quarter = st.selectbox("QUARTER:", ['Q1','Q2','Q3','Q4'], index=0, on_change=reset_button_state)
-if quarter =='Q1':
+if 'Q1' in quarter:
     bulan = ['January','February','March']
-if quarter =='Q2':
+if 'Q2' in quarter:
     bulan = ['April','May','June']
-if quarter =='Q3':
+if 'Q3' in quarter:
     bulan = ['July','August','September']
 else:
     bulan = ['October','November','December']
 
-df_month['Month'] = pd.Categorical(df_month['Month'],categories=pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
+df_month['Month'] = pd.Categorical(df_month['Month'],categories=list_bulan)#pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
 df_month = df_month.sort_values(['Month','Nama Barang'])
 
 df_3m = df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
