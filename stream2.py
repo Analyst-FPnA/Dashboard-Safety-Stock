@@ -175,7 +175,7 @@ def highlight_indikator(val):
         color = ''
     return color
     
-st.dataframe(df_quarter[df_quarter['Quarter']==quarter].style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
+st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
 
 df_month['Month'] = pd.Categorical(df_month['Month'],categories=pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
 df_month = df_month.sort_values(['Month','Nama Barang'])
