@@ -236,7 +236,7 @@ df_quarter =df_quarter[df_quarter['Kategori'].fillna('')==('MAINTENANCE' if kate
 df_3m = df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
     df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PICK UP']],how='left').merge(
         df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PEMBELIAN').reset_index().merge(
-            df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PEMBELIAN','HARGA PEMBELIAN TERAKHIR','TOTAL']],how='left'), 
+            df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PEMBELIAN','HARGA PEMBELIAN TERAKHIR','TOTAL [PEMBELIAN]']],how='left'), 
             how='left', on='Nama Barang').merge(df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG SALDO AKHIR').reset_index().merge(
     df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG SALDO AKHIR']],how='left'), how='left')
 
@@ -247,14 +247,14 @@ st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').
 st.write('')
 st.dataframe(df_3m.style.format(lambda x: format_number(x)), use_container_width=True, hide_index=True)
 
-df_line = df_quarter[df_quarter['OVERSTOCK']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
+df_line = df_quarter[df_quarter['OVERSTOCK']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL [SALDO PEMBELIAN]':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL [SALDO PEMBELIAN]':'TOTAL NOMINAL'}).reset_index()
 fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG','OVERSTOCK (QUARTER)')
 st.plotly_chart(fig, use_container_width=True)
 
-df_line2 = df_quarter[df_quarter['OVERSTOCK [ANGKA STANDART BARU]']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
+df_line2 = df_quarter[df_quarter['OVERSTOCK [ANGKA STANDART BARU]']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL [SALDO AKHIR]':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL [SALDO AKHIR]':'TOTAL NOMINAL'}).reset_index()
 fig = create_dual_axis_chart(df_line2, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG','OVERSTOCK [ANGKA STANDART BARU] (QUARTER)')
 st.plotly_chart(fig, use_container_width=True)
 
-df_line3 = df_quarter[df_quarter['OVERSTOCK [ANGKA STANDART LAMA]']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
+df_line3 = df_quarter[df_quarter['OVERSTOCK [ANGKA STANDART LAMA]']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL [SALDO AKHIR]':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL [SALDO AKHIR]':'TOTAL NOMINAL'}).reset_index()
 fig = create_dual_axis_chart(df_line3, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG','OVERSTOCK [ANGKA STANDART LAMA] (QUARTER)')
 st.plotly_chart(fig, use_container_width=True)
