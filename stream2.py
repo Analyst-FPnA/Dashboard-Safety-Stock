@@ -132,7 +132,7 @@ def download_file_from_google_drive(file_id, dest_path):
         url = f"https://drive.google.com/uc?id={file_id}"
         gdown.download(url, dest_path, quiet=False)
 
-file_id = '1LM2YWeFHBxER3fqR0cY_OuP8x5FnZyeu'
+file_id = '1BbhPgJVEPEc_QtGQv_tAd8EEzubkxlnr'
 dest_path = f'downloaded_file.zip'
 download_file_from_google_drive(file_id, dest_path)
         
@@ -217,13 +217,8 @@ def create_dual_axis_chart(data, x_column, y_bar_column, y_line_column, title):
 
     return fig
 
-df_line = df_quarter[df_quarter['INDIKATOR']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
-# Menampilkan grafik
-fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG','OVERSTOCK (QUARTER)')
-st.plotly_chart(fig, use_container_width=True)
-
 quarter = st.selectbox("QUARTER:", ['Q1','Q2','Q3','Q4'], index=0, on_change=reset_button_state)
-
+kategori = st.selectbox("KATEGORI:", ['SPAREPART','MAINTENANCE & REPAIR'], index=0, on_change=reset_button_state)
 if 'Q1' == quarter:
     bulan = ['January','February','March']
 if 'Q2' == quarter:
@@ -234,7 +229,8 @@ if 'Q4' == quarter:
     bulan = ['October','November','December']
 
 df_month['Month'] = pd.Categorical(df_month['Month'],categories=list_bulan)#pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
-df_month = df_month.sort_values(['Month','Nama Barang'])
+df_month = df_month[df_month['Kategori']==('MAINTENANCE' if kategori == 'MAINTENANCE & REPAIR' else '')].drop(columns='Kategori').sort_values(['Month','Nama Barang'])
+df_quarter =df_quarter[df_quarter['Kategori']==('MAINTENANCE' if kategori == 'MAINTENANCE & REPAIR' else '')].drop(columns='Kategori').sort_values('Nama Barang')
 
 df_3m = df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
     df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PICK UP']],how='left').merge(
@@ -250,7 +246,14 @@ st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').
 st.write('')
 st.dataframe(df_3m.style.format(lambda x: format_number(x)), use_container_width=True, hide_index=True)
 
-df_line2 = df_month[df_month['INDIKATOR']=='OVER'].groupby('Month').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
+df_line = df_quarter[df_quarter['OVERSTOCK']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
+fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG','OVERSTOCK (QUARTER)')
+st.plotly_chart(fig, use_container_width=True)
 
-fig = create_dual_axis_chart(df_line2, 'Month', 'TOTAL NOMINAL', 'TOTAL BARANG', 'OVERSTOCK (MONTH)')
+df_line2 = df_quarter[df_quarter['OVERSTOCK [ANGKA STANDART BARU]']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
+fig = create_dual_axis_chart(df_line2, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG','OVERSTOCK (QUARTER)')
+st.plotly_chart(fig, use_container_width=True)
+
+df_line3 = df_quarter[df_quarter['OVERSTOCK [ANGKA STANDART LAMA]']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL':'TOTAL NOMINAL'}).reset_index()
+fig = create_dual_axis_chart(df_lin3e, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG','OVERSTOCK (QUARTER)')
 st.plotly_chart(fig, use_container_width=True)
