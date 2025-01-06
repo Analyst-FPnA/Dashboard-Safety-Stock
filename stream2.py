@@ -247,7 +247,7 @@ st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').
 st.write('')
 st.dataframe(df_3m.style.format(lambda x: format_number(x)), use_container_width=True, hide_index=True)
 
-df_line = df_quarter[df_quarter['OVERSTOCK']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL [SALDO PEMBELIAN]':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL [SALDO PEMBELIAN]':'TOTAL NOMINAL'}).reset_index()
+df_line = df_quarter[df_quarter['OVERSTOCK']=='OVER'].groupby('Quarter').agg({'Nama Barang':'count','TOTAL [PEMBELIAN]':'sum'}).rename(columns={'Nama Barang':'TOTAL BARANG','TOTAL [PEMBELIAN]':'TOTAL NOMINAL'}).reset_index()
 fig = create_dual_axis_chart(df_line, 'Quarter', 'TOTAL NOMINAL', 'TOTAL BARANG','OVERSTOCK (QUARTER)')
 st.plotly_chart(fig, use_container_width=True)
 
