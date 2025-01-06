@@ -232,7 +232,7 @@ if 'Q4' == quarter:
 df_month['Month'] = pd.Categorical(df_month['Month'],categories=list_bulan)#pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
 df_month = df_month[df_month['Kategori'].fillna('')==('MAINTENANCE' if kategori == 'MAINTENANCE & REPAIR' else '')].drop(columns='Kategori').sort_values(['Month','Nama Barang'])
 df_quarter =df_quarter[df_quarter['Kategori'].fillna('')==('MAINTENANCE' if kategori == 'MAINTENANCE & REPAIR' else '')].drop(columns='Kategori').sort_values('Nama Barang')
-df_quarter.columns = [col.replace(" [", "\n[") for col in df_quarter.columns]
+
 
 df_3m = df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
     df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PICK UP']],how='left').merge(
@@ -244,7 +244,9 @@ df_3m = df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', colum
 df_3m.columns = [col.replace('_x', ' ') if col.endswith('_x') else col for col in df_3m.columns]
 df_3m.columns = [col.replace('_y', '  ') if col.endswith('_y') else col for col in df_3m.columns]
 
-st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['OVERSTOCK','OVERSTOCK [ANGKA STANDART BARU]','OVERSTOCK [ANGKA STANDART LAMA]']), use_container_width=True, hide_index=True)
+df_quarter.columns = [col.replace(" [", "\n[") for col in df_quarter.columns]
+
+st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['OVERSTOCK','OVERSTOCK\n[ANGKA STANDART BARU]','OVERSTOCK\n[ANGKA STANDART LAMA]']), use_container_width=True, hide_index=True)
 st.write('')
 st.dataframe(df_3m.style.format(lambda x: format_number(x)), use_container_width=True, hide_index=True)
 
