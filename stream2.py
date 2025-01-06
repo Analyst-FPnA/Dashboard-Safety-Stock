@@ -242,7 +242,7 @@ df_3m = df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', colum
 df_3m.columns = [col.replace('_x', ' ') if col.endswith('_x') else col for col in df_3m.columns]
 df_3m.columns = [col.replace('_y', '  ') if col.endswith('_y') else col for col in df_3m.columns]
 
-st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['INDIKATOR']), use_container_width=True, hide_index=True)
+st.dataframe(df_quarter[df_quarter['Quarter']==quarter].drop(columns='Quarter').style.format(lambda x: format_number(x)).applymap(highlight_indikator, subset=['OVERSTOCK']), use_container_width=True, hide_index=True)
 st.write('')
 st.dataframe(df_3m.style.format(lambda x: format_number(x)), use_container_width=True, hide_index=True)
 
