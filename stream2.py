@@ -228,10 +228,10 @@ if 'Q3' == quarter:
 if 'Q4' == quarter:
     bulan = ['October','November','December']
 
-st.dataframe(df_month)
+
 df_month['Month'] = pd.Categorical(df_month['Month'],categories=list_bulan)#pd.to_datetime(df_month['Month'],format='%B').sort_values().dt.strftime('%B').unique())
-df_month = df_month[df_month['Kategori']==('MAINTENANCE' if kategori == 'MAINTENANCE & REPAIR' else '')].drop(columns='Kategori').sort_values(['Month','Nama Barang'])
-df_quarter =df_quarter[df_quarter['Kategori']==('MAINTENANCE' if kategori == 'MAINTENANCE & REPAIR' else '')].drop(columns='Kategori').sort_values('Nama Barang')
+df_month = df_month[df_month['Kategori'].fillna('')==('MAINTENANCE' if kategori == 'MAINTENANCE & REPAIR' else '')].drop(columns='Kategori').sort_values(['Month','Nama Barang'])
+df_quarter =df_quarter[df_quarter['Kategori'].fillna('')==('MAINTENANCE' if kategori == 'MAINTENANCE & REPAIR' else '')].drop(columns='Kategori').sort_values('Nama Barang')
 
 df_3m = df_month[df_month['Month'].isin(bulan)].pivot(index='Nama Barang', columns=['Month'], values='AVG PICK UP').reset_index().merge(
     df_quarter[df_quarter['Quarter']==quarter][['Nama Barang','AVG PICK UP']],how='left').merge(
